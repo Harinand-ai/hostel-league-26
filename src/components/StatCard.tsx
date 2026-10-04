@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { PlayerStatEntry } from '../types/tournament';
 import { TeamBadge } from './TeamBadge';
 import { LucideIcon } from 'lucide-react';
@@ -24,30 +25,30 @@ export const StatCard: React.FC<StatCardProps> = ({
   emptyDescription = 'Statistics will appear once tournament matches are completed.',
 }) => {
   return (
-    <div className="rounded-xl bg-stadium-900 border border-stadium-800 overflow-hidden shadow-lg flex flex-col">
+    <div className="rounded-2xl bg-[#090d16] border border-stadium-750 overflow-hidden shadow-broadcast flex flex-col">
       {/* Header */}
-      <div className="p-4 sm:p-5 bg-stadium-950/70 border-b border-stadium-800/80 flex items-center justify-between">
+      <div className="p-5 bg-stadium-950/80 border-b border-stadium-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-stadium-800 border border-stadium-750 flex items-center justify-center text-gold-400">
+          <div className="w-10 h-10 rounded-xl bg-stadium-850 border border-stadium-750 flex items-center justify-center text-emerald-400">
             <Icon className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-display font-black text-base text-slate-100 uppercase tracking-wide">
+            <h3 className="font-display font-black text-base text-white uppercase tracking-tight">
               {title}
             </h3>
-            <p className="text-xs text-slate-400">{subtitle}</p>
+            <p className="text-xs text-slate-400 font-mono">{subtitle}</p>
           </div>
         </div>
       </div>
 
       {/* Body */}
-      <div className="p-2 sm:p-4 flex-1">
+      <div className="p-3 sm:p-4 flex-1">
         {entries.length === 0 ? (
           <EmptyState
             title={emptyTitle}
             description={emptyDescription}
             icon={Icon}
-            className="border-0 bg-transparent py-8"
+            className="border-0 bg-transparent py-10"
           />
         ) : (
           <div className="divide-y divide-stadium-800/50">
@@ -56,18 +57,22 @@ export const StatCard: React.FC<StatCardProps> = ({
               const isLeader = rank === 1;
 
               return (
-                <div
+                <motion.div
                   key={entry.player_id}
-                  className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: index * 0.04 }}
+                  className={`flex items-center justify-between p-3.5 rounded-xl transition-colors ${
                     isLeader ? 'bg-gold-500/[0.04]' : 'hover:bg-stadium-850/60'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3.5">
                     <span
-                      className={`w-6 h-6 rounded flex items-center justify-center font-display font-black text-xs ${
+                      className={`font-display font-black text-2xl w-8 text-center ${
                         isLeader
-                          ? 'bg-gold-500 text-stadium-950'
-                          : 'bg-stadium-800 text-slate-400 font-mono'
+                          ? 'text-gold-400 drop-shadow-[0_0_12px_rgba(245,158,11,0.5)]'
+                          : 'text-slate-500'
                       }`}
                     >
                       {rank}
@@ -76,24 +81,24 @@ export const StatCard: React.FC<StatCardProps> = ({
                     <TeamBadge team={entry.team} size="sm" />
 
                     <div>
-                      <span className="font-display font-bold text-sm text-slate-100 block">
+                      <span className="font-display font-black text-sm text-white block uppercase tracking-tight">
                         {entry.player_name}
                       </span>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-slate-400 font-mono">
                         {entry.team.name}
                       </span>
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <span className="font-display font-black text-base sm:text-lg text-gold-400">
+                  <div className="text-right font-mono">
+                    <span className="font-display font-black text-lg sm:text-xl text-gold-400">
                       {entry.value}
                     </span>
                     <span className="text-[10px] uppercase font-bold text-slate-400 block -mt-1">
                       {valueLabel}
                     </span>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>

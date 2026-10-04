@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { tournamentService } from './services/tournamentService';
 import { Team, Match, Player, Goal, Assist, ManOfTheMatch } from './types/tournament';
 import { 
@@ -129,11 +130,11 @@ export function App() {
   const motmLeaderboard = useMemo(() => getMotmLeaderboard(motms, players, teams), [motms, players, teams]);
 
   // Render current page content
-  const renderPage = () => {
+  const renderCurrentPage = () => {
     if (loading) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <div className="w-12 h-12 rounded-full border-4 border-gold-500/20 border-t-gold-500 animate-spin" />
+          <div className="w-12 h-12 rounded-full border-4 border-emerald-500/20 border-t-emerald-400 animate-spin" />
           <p className="mt-4 text-xs uppercase tracking-widest text-slate-400 font-mono">
             Loading Hostel League 26...
           </p>
@@ -270,14 +271,14 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-stadium-950 text-slate-100 selection:bg-gold-500/20 selection:text-gold-400">
+    <div className="min-h-screen flex flex-col bg-[#06080d] text-slate-100 selection:bg-emerald-500/20 selection:text-emerald-400">
       
       {/* Animated Opening Sequence */}
       {showIntro && (
         <OpeningAnimation onComplete={handleIntroComplete} />
       )}
 
-      {/* Main App Navigation */}
+      {/* Main Broadcast Navigation */}
       <Navbar
         currentTab={currentTab}
         onNavigate={handleNavigate}
@@ -285,9 +286,19 @@ export function App() {
         isAdminLoggedIn={isAdminLoggedIn}
       />
 
-      {/* Main Page Body */}
+      {/* Main Page Body with Seamless Page Transition */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        {renderPage()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentTab + (activeParam || '')}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {renderCurrentPage()}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Footer */}

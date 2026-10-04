@@ -13,19 +13,19 @@ export const TeamsPage: React.FC<TeamsPageProps> = ({
   onNavigate,
 }) => {
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       
       {/* Header */}
       <div className="pb-6 border-b border-stadium-800">
-        <div className="flex items-center gap-2 text-sky-400 text-xs font-bold uppercase tracking-widest mb-1">
+        <div className="flex items-center gap-2 text-sky-400 text-xs font-mono font-bold uppercase tracking-widest mb-1.5">
           <Shield className="w-3.5 h-3.5" />
-          The Six Contenders
+          THE SIX CONTENDERS
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black font-display tracking-tight text-white uppercase">
+        <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-white uppercase">
           TOURNAMENT CLUBS
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          The 6 competing clubs of Hostel League 26. Select a team to inspect manager details, squad, schedule, and form.
+        <p className="text-xs sm:text-sm text-slate-400 mt-1 font-mono">
+          The 6 official clubs competing in Hostel League 26. Select a club to inspect manager profiles, squad roster, and match log.
         </p>
       </div>
 

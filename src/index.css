@@ -5,54 +5,80 @@
 @layer base {
   body {
     @apply bg-stadium-950 text-slate-100 font-sans;
+    background-color: #06080d;
     background-image: 
-      radial-gradient(circle at 50% 0%, rgba(34, 50, 84, 0.35) 0%, transparent 60%),
-      radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 0% 100%, rgba(245, 158, 11, 0.04) 0%, transparent 50%);
+      radial-gradient(circle at 50% 0%, rgba(28, 36, 54, 0.45) 0%, transparent 55%),
+      radial-gradient(circle at 85% 100%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 15% 100%, rgba(245, 158, 11, 0.03) 0%, transparent 40%);
     background-attachment: fixed;
   }
 }
 
-/* Custom subtle scrollbar */
+/* Custom Sports Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #070a12;
+  background: #06080d;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: #1c2436;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #263147;
 }
 
-/* Stadium floodlight subtle effect */
-.stadium-glow {
-  position: relative;
+/* Subtle Pitch Line Markings */
+.pitch-lines {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
-.stadium-glow::before {
-  content: '';
+
+/* Diagonal Field Turf Mowing Striping */
+.turf-stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.008) 0px,
+    rgba(255, 255, 255, 0.008) 40px,
+    transparent 40px,
+    transparent 80px
+  );
+}
+
+/* Broadcast Lower-Third Cut Angle */
+.broadcast-clip {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0% 100%);
+}
+
+.broadcast-pill {
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+/* Subtle stadium lighting beam effect */
+.floodlight-beam {
   position: absolute;
-  top: -20%;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 80%;
-  height: 350px;
-  background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.12) 0%, rgba(15, 23, 42, 0) 70%);
+  width: 100%;
+  height: 250px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(56, 189, 248, 0.08) 0%, rgba(6, 8, 13, 0) 70%);
   pointer-events: none;
-  z-index: 0;
 }
 
-/* Subtle pitch line texture */
-.pitch-pattern {
-  background-size: 40px 40px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

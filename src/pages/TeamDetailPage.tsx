@@ -4,7 +4,7 @@ import { TeamBadge } from '../components/TeamBadge';
 import { FixtureCard } from '../components/FixtureCard';
 import { ResultCard } from '../components/ResultCard';
 import { EmptyState } from '../components/EmptyState';
-import { ArrowLeft, Shield, Trophy, Users, Flame } from 'lucide-react';
+import { ArrowLeft, Shield, Flame, Users, Calendar, Trophy } from 'lucide-react';
 
 interface TeamDetailPageProps {
   teamId: string;
@@ -33,9 +33,9 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
     return (
       <div className="py-12 text-center">
         <EmptyState
-          title="TEAM NOT FOUND"
-          description="The requested team does not exist in Hostel League 26."
-          actionText="Back to Teams"
+          title="CLUB NOT FOUND"
+          description="The requested club does not exist in Hostel League 26."
+          actionText="Back to Clubs"
           onAction={() => onNavigate('teams')}
         />
       </div>
@@ -67,62 +67,70 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
   });
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       
       {/* Back button */}
       <button
         onClick={() => onNavigate('teams')}
-        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to All Teams
+        Back to All Clubs
       </button>
 
-      {/* Team Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-stadium-900 via-stadium-850 to-stadium-900 border border-stadium-800 p-6 sm:p-8 shadow-xl">
-        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-6 text-center md:text-left">
+      {/* CLUB PROFILE HERO BANNER */}
+      <div className="relative overflow-hidden rounded-3xl bg-[#090d16] border border-stadium-750 p-6 sm:p-10 shadow-broadcast">
+        
+        {/* Subtle Club Color Light Halo */}
+        <div
+          className="absolute -top-24 -right-24 w-96 h-96 rounded-full blur-[120px] opacity-25 pointer-events-none"
+          style={{ backgroundColor: team.primary_color }}
+        />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-8 text-center md:text-left">
           
-          <div className="flex flex-col sm:flex-row items-center gap-5">
-            <TeamBadge team={team} size="xl" />
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <TeamBadge team={team} size="2xl" glow={true} />
+
             <div>
-              <div className="flex items-center justify-center sm:justify-start gap-2">
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-stadium-800 text-gold-400 border border-stadium-700">
+              <div className="flex items-center justify-center sm:justify-start gap-2.5 font-mono">
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-stadium-850 text-gold-400 border border-stadium-750">
                   {team.short_name}
                 </span>
-                <span className="text-xs font-mono text-slate-400">
-                  RANK #{standing.position}
+                <span className="text-xs font-bold text-slate-400">
+                  CURRENT STANDINGS: #{standing.position}
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-black font-display text-white mt-1 uppercase">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black font-display text-white mt-1.5 uppercase tracking-tight">
                 {team.name}
               </h1>
 
-              {/* Explicit Manager Display */}
-              <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-stadium-950/80 border border-stadium-750 text-xs">
-                <Shield className="w-3.5 h-3.5 text-gold-400" />
-                <span className="text-slate-400">TEAM MANAGER:</span>
-                <span className="text-white font-bold">{team.manager_name}</span>
+              {/* Explicit Manager Display as specified */}
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-stadium-950 border border-stadium-750 text-xs font-mono">
+                <Shield className="w-4 h-4 text-emerald-400" />
+                <span className="text-slate-400 font-sans">MANAGER:</span>
+                <span className="text-white font-bold uppercase">{team.manager_name}</span>
               </div>
             </div>
           </div>
 
-          {/* Form */}
-          <div className="flex flex-col items-center md:items-end">
-            <span className="text-xs text-slate-400 uppercase font-mono mb-1.5">Recent Form</span>
+          {/* Form Streak */}
+          <div className="flex flex-col items-center md:items-end font-mono">
+            <span className="text-xs text-slate-400 uppercase font-bold mb-2">RECENT FORM</span>
             <div className="flex items-center gap-1.5">
               {standing.form.length === 0 ? (
-                <span className="text-xs text-slate-400 font-mono">No matches yet</span>
+                <span className="text-xs text-slate-400">No matches played</span>
               ) : (
                 standing.form.map((r, i) => (
                   <span
                     key={i}
-                    className={`w-6 h-6 rounded flex items-center justify-center text-xs font-black font-mono ${
+                    className={`w-7 h-7 rounded text-xs font-black font-mono flex items-center justify-center shadow-sm ${
                       r === 'W'
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                        ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40'
                         : r === 'D'
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                        : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                        ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40'
+                        : 'bg-rose-500/25 text-rose-300 border border-rose-500/40'
                     }`}
                   >
                     {r}
@@ -134,63 +142,61 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
 
         </div>
 
-        {/* Statistics Bar */}
-        <div className="mt-8 pt-6 border-t border-stadium-800 grid grid-cols-4 sm:grid-cols-8 gap-3 text-center font-mono">
-          <div className="p-2 rounded bg-stadium-950/60 border border-stadium-800/60">
-            <span className="text-[10px] text-slate-400 uppercase block font-sans">P</span>
-            <span className="text-base font-bold text-slate-200">{standing.played}</span>
+        {/* Season Record Ticker Bar */}
+        <div className="mt-10 pt-6 border-t border-stadium-800 grid grid-cols-4 sm:grid-cols-8 gap-3 text-center font-mono">
+          <div className="p-3 rounded-xl bg-stadium-950/80 border border-stadium-800">
+            <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">PLAYED</span>
+            <span className="text-lg font-bold text-slate-200">{standing.played}</span>
           </div>
-          <div className="p-2 rounded bg-stadium-950/60 border border-stadium-800/60">
-            <span className="text-[10px] text-slate-400 uppercase block font-sans">W</span>
-            <span className="text-base font-bold text-emerald-400">{standing.won}</span>
+          <div className="p-3 rounded-xl bg-stadium-950/80 border border-stadium-800">
+            <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">WON</span>
+            <span className="text-lg font-bold text-emerald-400">{standing.won}</span>
           </div>
-          <div className="p-2 rounded bg-stadium-950/60 border border-stadium-800/60">
-            <span className="text-[10px] text-slate-400 uppercase block font-sans">D</span>
-            <span className="text-base font-bold text-slate-300">{standing.drawn}</span>
+          <div className="p-3 rounded-xl bg-stadium-950/80 border border-stadium-800">
+            <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">DRAWN</span>
+            <span className="text-lg font-bold text-slate-300">{standing.drawn}</span>
           </div>
-          <div className="p-2 rounded bg-stadium-950/60 border border-stadium-800/60">
-            <span className="text-[10px] text-slate-400 uppercase block font-sans">L</span>
-            <span className="text-base font-bold text-rose-400">{standing.lost}</span>
+          <div className="p-3 rounded-xl bg-stadium-950/80 border border-stadium-800">
+            <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">LOST</span>
+            <span className="text-lg font-bold text-rose-400">{standing.lost}</span>
           </div>
-          <div className="p-2 rounded bg-stadium-950/60 border border-stadium-800/60">
-            <span className="text-[10px] text-slate-400 uppercase block font-sans">GF</span>
-            <span className="text-base font-bold text-slate-200">{standing.goals_for}</span>
+          <div className="p-3 rounded-xl bg-stadium-950/80 border border-stadium-800">
+            <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">GF</span>
+            <span className="text-lg font-bold text-slate-200">{standing.goals_for}</span>
           </div>
-          <div className="p-2 rounded bg-stadium-950/60 border border-stadium-800/60">
-            <span className="text-[10px] text-slate-400 uppercase block font-sans">GA</span>
-            <span className="text-base font-bold text-slate-300">{standing.goals_against}</span>
+          <div className="p-3 rounded-xl bg-stadium-950/80 border border-stadium-800">
+            <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">GA</span>
+            <span className="text-lg font-bold text-slate-300">{standing.goals_against}</span>
           </div>
-          <div className="p-2 rounded bg-stadium-950/60 border border-stadium-800/60">
-            <span className="text-[10px] text-slate-400 uppercase block font-sans">GD</span>
-            <span className={`text-base font-bold ${standing.goal_difference > 0 ? 'text-emerald-400' : standing.goal_difference < 0 ? 'text-rose-400' : 'text-slate-200'}`}>
+          <div className="p-3 rounded-xl bg-stadium-950/80 border border-stadium-800">
+            <span className="text-[10px] text-slate-400 uppercase block font-sans font-bold">GD</span>
+            <span className={`text-lg font-bold ${standing.goal_difference > 0 ? 'text-emerald-400' : standing.goal_difference < 0 ? 'text-rose-400' : 'text-slate-200'}`}>
               {standing.goal_difference > 0 ? `+${standing.goal_difference}` : standing.goal_difference}
             </span>
           </div>
-          <div className="p-2 rounded bg-gold-500/10 border border-gold-500/30">
-            <span className="text-[10px] text-gold-400 uppercase block font-sans font-bold">PTS</span>
-            <span className="text-base font-black text-gold-400">{standing.points}</span>
+          <div className="p-3 rounded-xl bg-gold-500/10 border border-gold-500/30">
+            <span className="text-[10px] text-gold-400 uppercase block font-sans font-black">POINTS</span>
+            <span className="text-lg font-black text-gold-400">{standing.points}</span>
           </div>
         </div>
       </div>
 
-      {/* Top Scorer & Squad Row */}
+      {/* Squad & Top Scorer Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Squad list (2 Cols) */}
+        {/* Registered Squad Roster (2 Cols) */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-sky-400" />
-              <h3 className="text-base font-black font-display uppercase tracking-wider text-slate-100">
-                REGISTERED SQUAD ({teamPlayers.length})
-              </h3>
-            </div>
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-sm font-display font-black uppercase tracking-broadcast text-white">
+              REGISTERED SQUAD ({teamPlayers.length})
+            </h3>
           </div>
 
           {teamPlayers.length === 0 ? (
             <EmptyState
               title="NO PLAYERS REGISTERED"
-              description="Players can be added to this squad via the tournament admin dashboard."
+              description="Squad members for this club will be entered by tournament officials in the admin dashboard."
               icon={Users}
               className="py-10"
             />
@@ -199,17 +205,17 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
               {teamPlayers.map(player => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-stadium-900 border border-stadium-800"
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-[#090d16] border border-stadium-750"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded bg-stadium-800 text-slate-300 font-bold font-mono text-xs flex items-center justify-center border border-stadium-750">
+                    <span className="w-8 h-8 rounded-lg bg-stadium-850 text-slate-200 font-mono font-bold text-xs flex items-center justify-center border border-stadium-700">
                       {player.position}
                     </span>
                     <div>
-                      <span className="font-bold text-sm text-slate-100 block">
+                      <span className="font-display font-black text-sm text-white block uppercase tracking-tight">
                         {player.name}
                       </span>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-slate-400 font-mono">
                         {player.position === 'GK' ? 'Goalkeeper' : player.position === 'DEF' ? 'Defender' : player.position === 'MID' ? 'Midfielder' : 'Forward'}
                       </span>
                     </div>
@@ -220,34 +226,34 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
           )}
         </div>
 
-        {/* Top Scorer Card (1 Col) */}
+        {/* Club Top Scorer (1 Col) */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Flame className="w-4 h-4 text-gold-400" />
-            <h3 className="text-base font-black font-display uppercase tracking-wider text-slate-100">
-              CLUB TOP SCORER
+            <h3 className="text-sm font-display font-black uppercase tracking-broadcast text-white">
+              CLUB LEADING SCORER
             </h3>
           </div>
 
           {topScorerPlayer ? (
-            <div className="p-5 rounded-xl bg-stadium-900 border border-stadium-800 text-center flex flex-col items-center">
-              <div className="w-12 h-12 rounded-full bg-gold-500/20 border border-gold-500/40 flex items-center justify-center text-gold-400 mb-3">
-                <Flame className="w-6 h-6" />
+            <div className="p-6 rounded-2xl bg-[#090d16] border border-stadium-750 text-center flex flex-col items-center shadow-broadcast">
+              <div className="w-14 h-14 rounded-2xl bg-gold-500/20 border border-gold-500/40 flex items-center justify-center text-gold-400 mb-3 shadow-inner">
+                <Flame className="w-7 h-7" />
               </div>
-              <h4 className="font-display font-black text-lg text-white">
+              <h4 className="font-display font-black text-xl text-white uppercase">
                 {(topScorerPlayer as any).player.name}
               </h4>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-400 font-mono mt-0.5">
                 {(topScorerPlayer as any).player.position}
               </p>
-              <div className="mt-4 pt-3 border-t border-stadium-800 w-full flex items-center justify-center gap-2 font-mono">
-                <span className="text-2xl font-black text-gold-400">{(topScorerPlayer as any).count}</span>
-                <span className="text-xs uppercase text-slate-400 font-bold">Goals Scored</span>
+              <div className="mt-5 pt-4 border-t border-stadium-800 w-full flex items-center justify-center gap-2 font-mono">
+                <span className="text-3xl font-black text-gold-400">{(topScorerPlayer as any).count}</span>
+                <span className="text-xs uppercase text-slate-400 font-bold">Tournament Goals</span>
               </div>
             </div>
           ) : (
             <EmptyState
-              title="NO GOALS SCORED YET"
+              title="NO GOALS SCORED"
               description="Club top scorer will update as matches are played."
               icon={Flame}
               className="py-10"
@@ -257,14 +263,14 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
 
       </div>
 
-      {/* Team Schedule: Upcoming Fixtures & Recent Results */}
+      {/* Club Schedule: Upcoming Fixtures & Results */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Upcoming fixtures for this team */}
         <div className="space-y-4">
-          <h3 className="text-base font-black font-display uppercase tracking-wider text-slate-100 flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-gold-400" />
-            UPCOMING FIXTURES ({upcomingMatches.length})
+          <h3 className="text-sm font-display font-black uppercase tracking-broadcast text-white flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-emerald-400" />
+            UPCOMING CLUB FIXTURES ({upcomingMatches.length})
           </h3>
 
           {upcomingMatches.length === 0 ? (
@@ -296,14 +302,14 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
 
         {/* Recent results for this team */}
         <div className="space-y-4">
-          <h3 className="text-base font-black font-display uppercase tracking-wider text-slate-100 flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-emerald-400" />
-            RECENT RESULTS ({recentResults.length})
+          <h3 className="text-sm font-display font-black uppercase tracking-broadcast text-white flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-gold-400" />
+            RECENT MATCH REPORTS ({recentResults.length})
           </h3>
 
           {recentResults.length === 0 ? (
             <EmptyState
-              title="NO RESULTS YET"
+              title="NO COMPLETED MATCHES"
               description="This club has not completed any tournament fixtures yet."
             />
           ) : (

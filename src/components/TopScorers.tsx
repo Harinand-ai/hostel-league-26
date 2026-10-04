@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { PlayerStatEntry } from '../types/tournament';
 import { TeamBadge } from './TeamBadge';
 import { Flame } from 'lucide-react';
@@ -28,26 +29,29 @@ export const TopScorers: React.FC<TopScorersProps> = ({
   }
 
   return (
-    <div className="w-full rounded-xl bg-stadium-900 border border-stadium-800 overflow-hidden shadow-lg">
+    <div className="w-full rounded-2xl bg-[#090d16] border border-stadium-750 overflow-hidden shadow-broadcast">
       <div className="divide-y divide-stadium-800/60">
         {displayScorers.map((entry, index) => {
           const rank = index + 1;
           const isGoldenBoot = rank === 1;
 
           return (
-            <div
+            <motion.div
               key={entry.player_id}
-              className={`flex items-center justify-between p-3.5 sm:p-4 transition-colors ${
-                isGoldenBoot ? 'bg-gold-500/[0.04]' : 'hover:bg-stadium-850/60'
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              className={`flex items-center justify-between p-4 transition-colors ${
+                isGoldenBoot ? 'bg-gold-500/[0.05]' : 'hover:bg-stadium-850/60'
               }`}
             >
               {/* Rank & Player info */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3.5">
                 <span
-                  className={`w-6 h-6 rounded flex items-center justify-center font-display font-black text-xs ${
+                  className={`font-display font-black text-2xl w-8 text-center ${
                     isGoldenBoot
-                      ? 'bg-gold-500 text-stadium-950 font-black shadow-sm'
-                      : 'bg-stadium-800 text-slate-400 font-mono'
+                      ? 'text-gold-400 drop-shadow-[0_0_12px_rgba(245,158,11,0.5)]'
+                      : 'text-slate-500'
                   }`}
                 >
                   {rank}
@@ -56,33 +60,31 @@ export const TopScorers: React.FC<TopScorersProps> = ({
                 <TeamBadge team={entry.team} size="sm" />
 
                 <div>
-                  <h4 className="font-display font-bold text-sm text-slate-100">
+                  <h4 className="font-display font-black text-sm text-white tracking-tight uppercase">
                     {entry.player_name}
                   </h4>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-400 font-mono">
                     {entry.team.name}
                   </p>
                 </div>
               </div>
 
               {/* Goals counter */}
-              <div className="flex items-center gap-2">
-                <div className="text-right">
-                  <span className="font-display font-black text-lg sm:text-xl text-gold-400">
-                    {entry.value}
-                  </span>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block -mt-1">
-                    {entry.value === 1 ? 'Goal' : 'Goals'}
-                  </span>
-                </div>
+              <div className="text-right font-mono">
+                <span className="font-display font-black text-xl sm:text-2xl text-gold-400">
+                  {entry.value}
+                </span>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block -mt-1">
+                  {entry.value === 1 ? 'GOAL' : 'GOALS'}
+                </span>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       {onViewAll && scorers.length > limit && (
-        <div className="p-3 bg-stadium-950/60 border-t border-stadium-800/60 text-center">
+        <div className="p-3 bg-stadium-950/80 border-t border-stadium-800 text-center font-mono">
           <button
             onClick={onViewAll}
             className="text-xs font-bold uppercase tracking-wider text-gold-400 hover:text-white transition-colors"
