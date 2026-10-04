@@ -50,14 +50,26 @@ export const HomePage: React.FC<HomePageProps> = ({
             HOSTEL LEAGUE <span className="text-gold-400">26</span>
           </h1>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2.5 text-xs sm:text-sm font-mono text-[#9EA4AD] uppercase tracking-wider">
-            <span className="text-white font-bold">THE BATTLE FOR THE CROWN</span>
-            <span className="text-pitch-500">•</span>
-            <span>SIX CLUBS</span>
-            <span className="text-pitch-500">•</span>
-            <span>SINGLE ROUND-ROBIN</span>
-            <span className="text-pitch-500">•</span>
-            <span>FIFTEEN FIXTURES</span>
+          {/* TOURNAMENT CORE METRICS: 6 CLUBS • 15 FIXTURES • 5 ROUNDS */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs sm:text-sm">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl sm:text-2xl font-black font-display text-white">6</span>
+              <span className="text-[#9EA4AD] tracking-wider uppercase text-xs font-semibold">Clubs</span>
+            </div>
+            <span className="text-stadium-700 select-none hidden sm:inline">|</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl sm:text-2xl font-black font-display text-white">15</span>
+              <span className="text-[#9EA4AD] tracking-wider uppercase text-xs font-semibold">Fixtures</span>
+            </div>
+            <span className="text-stadium-700 select-none hidden sm:inline">|</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl sm:text-2xl font-black font-display text-white">5</span>
+              <span className="text-[#9EA4AD] tracking-wider uppercase text-xs font-semibold">Rounds</span>
+            </div>
+            <span className="text-stadium-700 select-none hidden sm:inline">|</span>
+            <span className="text-pitch-500 font-bold tracking-wider uppercase text-xs">
+              Single Round-Robin
+            </span>
           </div>
         </div>
       </section>
@@ -173,24 +185,27 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       </section>
 
-      {/* 5. TOURNAMENT INFORMATION FOOTER STRIP */}
-      <section className="p-6 rounded-card bg-stadium-900 border border-stadium-800 font-mono text-xs">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+      {/* 5. TOURNAMENT INFORMATION */}
+      <section className="space-y-3 pt-6 border-t border-stadium-800">
+        <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-[#F4F4F0]">
+          TOURNAMENT INFORMATION
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-5 px-6 rounded-card bg-stadium-900 border border-stadium-800 font-mono text-xs">
           <div>
             <span className="text-[#9EA4AD] uppercase text-[10px] block">TOTAL CLUBS</span>
-            <span className="font-bold text-base text-white mt-1 block">6 TEAMS</span>
+            <span className="font-bold text-sm sm:text-base text-white mt-1 block">6 CLUBS</span>
           </div>
           <div>
             <span className="text-[#9EA4AD] uppercase text-[10px] block">FORMAT</span>
-            <span className="font-bold text-base text-pitch-500 mt-1 block">ROUND-ROBIN</span>
+            <span className="font-bold text-sm sm:text-base text-pitch-500 mt-1 block">5 ROUNDS • 15 MATCHES</span>
           </div>
           <div>
-            <span className="text-[#9EA4AD] uppercase text-[10px] block">MATCHES</span>
-            <span className="font-bold text-base text-white mt-1 block">15 FIXTURES</span>
+            <span className="text-[#9EA4AD] uppercase text-[10px] block">COMPETITION</span>
+            <span className="font-bold text-sm sm:text-base text-white mt-1 block">SINGLE ROUND-ROBIN</span>
           </div>
           <div>
-            <span className="text-[#9EA4AD] uppercase text-[10px] block">SCORING</span>
-            <span className="font-bold text-base text-gold-400 mt-1 block">WIN 3 PTS / DRAW 1 PT</span>
+            <span className="text-[#9EA4AD] uppercase text-[10px] block">POINTS SYSTEM</span>
+            <span className="font-bold text-sm sm:text-base text-gold-400 mt-1 block">WIN 3 PTS • DRAW 1 PT</span>
           </div>
         </div>
       </section>
