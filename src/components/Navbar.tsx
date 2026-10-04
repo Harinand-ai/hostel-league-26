@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Menu, X, Shield, PlayCircle, Volume2, VolumeX } from 'lucide-react';
+import { Trophy, Menu, X, Shield, PlayCircle, Volume2, VolumeX, ArrowUpRight } from 'lucide-react';
 import { audioService } from '../services/audioService';
 
 interface NavbarProps {
@@ -97,6 +97,17 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right actions: Audio Toggle, Replay Intro & discreet Admin button */}
           <div className="hidden md:flex items-center gap-2 font-mono">
+            {/* Quick Tournament Overview Bridge */}
+            <a
+              href="https://hostelleague.vercel.app/"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-badge text-xs font-mono font-bold text-pitch-400 hover:text-white bg-pitch-950/40 hover:bg-pitch-900/60 border border-pitch-800/60 transition-colors"
+              title="Quick Tournament Overview"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-pitch-500 animate-pulse" />
+              <span>QUICK VIEW</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+
             {/* Audio Toggle */}
             <button
               onClick={handleToggleSound}
@@ -182,7 +193,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             );
           })}
 
-          <div className="pt-3 border-t border-stadium-800 mt-2 flex items-center justify-between px-1">
+          {/* Quick Tournament Overview Bridge */}
+          <div className="pt-3 pb-1 border-t border-stadium-800 mt-2">
+            <a
+              href="https://hostelleague.vercel.app/"
+              className="flex items-center justify-between p-3 rounded-badge bg-pitch-950/40 border border-pitch-800/60 text-xs font-mono font-bold text-pitch-400 hover:text-white transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-pitch-500 animate-pulse" />
+                <span>QUICK TOURNAMENT VIEW</span>
+              </div>
+              <ArrowUpRight className="w-4 h-4" />
+            </a>
+          </div>
+
+          <div className="pt-2 flex items-center justify-between px-1">
             <button
               onClick={() => handleNavClick('admin')}
               className="text-xs font-semibold text-[#9EA4AD] hover:text-gold-400 flex items-center gap-1.5 py-1.5"

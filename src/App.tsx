@@ -28,9 +28,14 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [activeParam, setActiveParam] = useState<string | undefined>(undefined);
 
-  // Intro state (persisted in localStorage)
+  // Intro state (persisted in localStorage or controlled via URL)
   const [showIntro, setShowIntro] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('intro') === 'true') return true;
+    if (urlParams.get('view') === 'full' || window.location.hash.length > 1) {
+      return false;
+    }
     return !localStorage.getItem('hl26_seen_intro');
   });
 

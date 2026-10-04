@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { INITIAL_TEAMS } from '../data/initialData';
 import { TeamBadge } from './TeamBadge';
 import { audioService } from '../services/audioService';
-import { FastForward, Volume2, VolumeX, Shield } from 'lucide-react';
+import { FastForward, Volume2, VolumeX, Shield, ArrowRight } from 'lucide-react';
 
 interface OpeningAnimationProps {
   onComplete: () => void;
@@ -13,12 +13,14 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
   // Pacing:
   // Phase 1 (0.0s – 1.8s): Dark Stadium Ambience
   // Phase 2 (1.8s – 3.8s): HOSTEL LEAGUE Typography Reveal
-  // Phase 3 (3.8s – 5.2s): 26 Reveal + Tournament Specs (6 Clubs • 15 Fixtures • 5 Rounds)
-  // Phase 4 (5.2s – 12.4s): 6 Clubs Spotlight (Full 1.2s of readable screen time for each club)
-  // Phase 5 (12.4s – 14.2s): "THE BATTLE FOR THE CROWN" + Referee Whistle & Ball Kick Transition
-  const [phase, setPhase] = useState<1 | 2 | 3 | 4 | 5>(1);
+  // Phase 3 (3.8s – 5.2s): 26 Reveal + Tournament Specs (6 Clubs • 5 Rounds • 15 Fixtures)
+  // Phase 4 (5.2s – 13.0s): 6 Clubs Spotlight (Full 1.3s of readable screen time for each club)
+  // Phase 5 (13.0s – 15.0s): "THE BATTLE FOR THE CROWN" + Referee Whistle & Ball Kick
+  // Phase 6 (15.0s+): Tournament Overview Transition ("THE TOURNAMENT IS UNDERWAY")
+  const [phase, setPhase] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [clubIndex, setClubIndex] = useState<number>(0);
   const [isMuted, setIsMuted] = useState<boolean>(audioService.getMuted());
+  const [overviewTimer, setOverviewTimer] = useState<number>(3);
   const completedRef = useRef(false);
 
   // Exact ordered list of the 6 clubs as specified
@@ -35,13 +37,31 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
     if (completedRef.current) return;
     completedRef.current = true;
     audioService.playBallKick();
+    localStorage.setItem('hl26_seen_intro', 'true');
     onComplete();
+  };
+
+  const handleNavigateToOverview = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    audioService.playBroadcastHit();
+    localStorage.setItem('hl26_seen_intro', 'true');
+    window.location.href = 'https://hostelleague.vercel.app/';
+  };
+
+  const handleSkipToTransition = () => {
+    if (phase < 6) {
+      setPhase(6);
+      audioService.playBroadcastHit();
+    } else {
+      handleFinish();
+    }
   };
 
   // Main Scene Orchestration
   useEffect(() => {
     // 0.0s: Ambient stadium crowd rumble
-    audioService.playStadiumAmbience(15);
+    audioService.playStadiumAmbience(18);
 
     // 1.8s: Phase 2 - HOSTEL LEAGUE
     const t2 = setTimeout(() => {
@@ -62,16 +82,17 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
       audioService.playClubTransition(380);
     }, 5200);
 
-    // 13.0s (5.2s + 6 * 1.3s = 13.0s): Phase 5 - Final Battle for the Crown & Referee Whistle
+    // 13.0s: Phase 5 - Final Battle for the Crown & Referee Whistle
     const t5 = setTimeout(() => {
       setPhase(5);
       audioService.playRefereeWhistle();
     }, 13000);
 
-    // 14.8s: Ball Kick & Homepage transition
+    // 15.0s: Ball Kick & Move to Tournament Overview Transition
     const t6 = setTimeout(() => {
-      handleFinish();
-    }, 14800);
+      audioService.playBallKick();
+      setPhase(6);
+    }, 15000);
 
     return () => {
       clearTimeout(t2);
@@ -81,6 +102,24 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
       clearTimeout(t6);
     };
   }, []);
+
+  // Phase 6 Countdown to auto-navigate to Quick Tournament View
+  useEffect(() => {
+    if (phase !== 6) return;
+
+    const interval = setInterval(() => {
+      setOverviewTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          handleNavigateToOverview();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [phase]);
 
   // Club Step Progression: Each of the 6 clubs gets 1300ms of dedicated screen time
   useEffect(() => {
@@ -263,6 +302,71 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
             </motion.div>
           )}
 
+          {/* PHASE 6: TOURNAMENT OVERVIEW TRANSITION */}
+          {phase === 6 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center max-w-xl mx-auto px-4"
+            >
+              <div className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-widest text-pitch-500 uppercase mb-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-pitch-500 animate-pulse" />
+                <span>OFFICIAL BROADCAST TRANSITION</span>
+              </div>
+
+              <h2 className="text-4xl sm:text-6xl font-black font-display uppercase tracking-tight text-white leading-tight">
+                HOSTEL LEAGUE <span className="text-gold-400">26</span>
+              </h2>
+
+              <p className="mt-3 text-lg sm:text-2xl font-display font-extrabold uppercase tracking-wide text-white">
+                THE TOURNAMENT IS UNDERWAY
+              </p>
+
+              <div className="mt-2 text-xs sm:text-sm font-mono tracking-widest text-[#9EA4AD] uppercase flex items-center gap-2">
+                <span>6 CLUBS</span>
+                <span className="text-pitch-500">•</span>
+                <span>5 ROUNDS</span>
+                <span className="text-pitch-500">•</span>
+                <span>15 MATCHES</span>
+              </div>
+
+              {/* Progress bar leading into Quick Tournament Overview */}
+              <div className="w-full max-w-sm mt-8 p-4 rounded-card bg-stadium-900 border border-stadium-800 shadow-broadcast">
+                <div className="flex items-center justify-between text-[11px] font-mono text-[#9EA4AD] uppercase mb-2">
+                  <span className="text-white font-bold">CONNECTING TOURNAMENT OVERVIEW</span>
+                  <span className="text-pitch-400 font-bold">{overviewTimer}s</span>
+                </div>
+                <div className="w-full bg-stadium-950 h-1.5 rounded-full overflow-hidden border border-stadium-850">
+                  <motion.div
+                    initial={{ width: '0%' }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 3, ease: 'linear' }}
+                    className="bg-pitch-500 h-full"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 w-full max-w-sm">
+                <button
+                  onClick={handleNavigateToOverview}
+                  className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-badge bg-pitch-600 hover:bg-pitch-500 text-[#07090D] font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-broadcast"
+                >
+                  <span>Enter Tournament Overview</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  onClick={handleFinish}
+                  className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-badge bg-stadium-900 hover:bg-stadium-850 border border-stadium-800 text-white font-mono font-semibold text-xs uppercase tracking-wider transition-colors"
+                >
+                  <span>Explore Full Broadcast Hub</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+
         </div>
 
         {/* BOTTOM CONTROLS: SOUND & SKIP INTRO */}
@@ -288,10 +392,10 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
 
           {/* Skip Intro */}
           <button
-            onClick={handleFinish}
+            onClick={handleSkipToTransition}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-badge bg-stadium-900 hover:bg-stadium-850 border border-stadium-800 text-xs font-mono font-bold uppercase tracking-wider text-[#F4F4F0] hover:text-white transition-all group"
           >
-            <span>Skip Intro</span>
+            <span>{phase === 6 ? 'Enter Hub' : 'Skip Intro'}</span>
             <FastForward className="w-3.5 h-3.5 text-gold-400 group-hover:translate-x-1 transition-transform" />
           </button>
 

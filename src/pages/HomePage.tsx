@@ -5,7 +5,7 @@ import { ResultCard } from '../components/ResultCard';
 import { LeagueTable } from '../components/LeagueTable';
 import { TopScorers } from '../components/TopScorers';
 import { EmptyState } from '../components/EmptyState';
-import { Trophy, ArrowRight, Shield } from 'lucide-react';
+import { Trophy, ArrowRight, Shield, ArrowUpRight } from 'lucide-react';
 
 interface HomePageProps {
   teams: Team[];
@@ -69,6 +69,21 @@ export const HomePage: React.FC<HomePageProps> = ({
             <span className="text-stadium-700 select-none hidden sm:inline">|</span>
             <span className="text-pitch-500 font-bold tracking-wider uppercase text-xs">
               Single Round-Robin
+            </span>
+          </div>
+
+          {/* Quick Tournament Overview Layer Bridge */}
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <a
+              href="https://hostelleague.vercel.app/"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-badge bg-pitch-950/40 hover:bg-pitch-900/60 border border-pitch-800/60 text-xs font-mono font-bold text-pitch-400 hover:text-white transition-colors"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-pitch-500 animate-pulse" />
+              <span>QUICK TOURNAMENT VIEW</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+            <span className="text-[11px] font-mono text-[#9EA4AD]">
+              Instant fixtures, standings & committee contacts
             </span>
           </div>
         </div>
@@ -207,6 +222,18 @@ export const HomePage: React.FC<HomePageProps> = ({
             <span className="text-[#9EA4AD] uppercase text-[10px] block">POINTS SYSTEM</span>
             <span className="font-bold text-sm sm:text-base text-gold-400 mt-1 block">WIN 3 PTS • DRAW 1 PT</span>
           </div>
+        </div>
+
+        {/* Quick Tournament Overview layer bridge */}
+        <div className="pt-2 px-1 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-[#9EA4AD]">
+          <span>Need the lightweight match schedule and committee contacts?</span>
+          <a
+            href="https://hostelleague.vercel.app/"
+            className="inline-flex items-center gap-1.5 text-pitch-400 hover:text-white font-bold transition-colors"
+          >
+            <span>Open Quick Tournament View</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </a>
         </div>
       </section>
 
