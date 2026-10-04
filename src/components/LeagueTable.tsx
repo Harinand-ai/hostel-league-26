@@ -16,32 +16,32 @@ export const LeagueTable: React.FC<LeagueTableProps> = ({
   isCompact = false,
 }) => {
   return (
-    <div className="w-full overflow-hidden rounded-2xl bg-[#090d16] border border-stadium-750 shadow-broadcast">
+    <div className="w-full overflow-hidden rounded-card bg-stadium-900 border border-stadium-800 shadow-broadcast">
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse text-xs sm:text-sm">
+        <table className="w-full text-left border-collapse text-xs sm:text-sm font-mono">
           <thead>
-            <tr className="bg-stadium-950 border-b border-stadium-750 text-[11px] uppercase tracking-wider text-slate-400 font-mono font-bold">
-              <th className="py-4 px-3 sm:px-4 text-center w-12 sm:w-14">POS</th>
-              <th className="py-4 px-3 sm:px-4">CLUB</th>
-              <th className="py-4 px-2 sm:px-3 text-center w-10 font-mono">P</th>
+            <tr className="bg-stadium-950 border-b border-stadium-800 text-[11px] uppercase tracking-wider text-[#9EA4AD]">
+              <th className="py-3 px-3 sm:px-4 text-center w-12">POS</th>
+              <th className="py-3 px-3 sm:px-4 font-sans font-bold">CLUB</th>
+              <th className="py-3 px-2 sm:px-3 text-center w-10">P</th>
               {!isCompact && (
                 <>
-                  <th className="py-4 px-2 sm:px-3 text-center w-10 font-mono hidden sm:table-cell">W</th>
-                  <th className="py-4 px-2 sm:px-3 text-center w-10 font-mono hidden sm:table-cell">D</th>
-                  <th className="py-4 px-2 sm:px-3 text-center w-10 font-mono hidden sm:table-cell">L</th>
-                  <th className="py-4 px-2 sm:px-3 text-center w-12 font-mono hidden md:table-cell">GF</th>
-                  <th className="py-4 px-2 sm:px-3 text-center w-12 font-mono hidden md:table-cell">GA</th>
+                  <th className="py-3 px-2 sm:px-3 text-center w-10 hidden sm:table-cell">W</th>
+                  <th className="py-3 px-2 sm:px-3 text-center w-10 hidden sm:table-cell">D</th>
+                  <th className="py-3 px-2 sm:px-3 text-center w-10 hidden sm:table-cell">L</th>
+                  <th className="py-3 px-2 sm:px-3 text-center w-12 hidden md:table-cell">GF</th>
+                  <th className="py-3 px-2 sm:px-3 text-center w-12 hidden md:table-cell">GA</th>
                 </>
               )}
-              <th className="py-4 px-2 sm:px-3 text-center w-12 font-mono">GD</th>
-              <th className="py-4 px-3 sm:px-4 text-center w-16 font-mono text-gold-400 font-black text-xs sm:text-sm">PTS</th>
+              <th className="py-3 px-2 sm:px-3 text-center w-12">GD</th>
+              <th className="py-3 px-3 sm:px-4 text-center w-16 text-gold-400 font-bold">PTS</th>
               {!isCompact && (
-                <th className="py-4 px-3 sm:px-4 text-center hidden lg:table-cell">FORM</th>
+                <th className="py-3 px-3 sm:px-4 text-center hidden lg:table-cell">FORM</th>
               )}
-              {onTeamClick && <th className="py-4 px-2 w-8"></th>}
+              {onTeamClick && <th className="py-3 px-2 w-8"></th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-stadium-800/60 font-medium">
+          <tbody className="divide-y divide-stadium-800/70 font-medium">
             <AnimatePresence>
               {standings.map((row) => {
                 const isLeader = row.position === 1;
@@ -56,35 +56,31 @@ export const LeagueTable: React.FC<LeagueTableProps> = ({
                     transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                     onClick={() => onTeamClick && onTeamClick(row.team.id)}
                     className={`group transition-colors duration-150 ${
-                      onTeamClick ? 'cursor-pointer hover:bg-stadium-850/80' : ''
+                      onTeamClick ? 'cursor-pointer hover:bg-stadium-850' : ''
                     } ${isLeader ? 'bg-gold-500/[0.04]' : ''}`}
                   >
                     {/* Position */}
-                    <td className="py-3.5 px-3 sm:px-4 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <span
-                          className={`inline-flex items-center justify-center w-6 h-6 rounded-md font-display font-black text-xs ${
-                            isLeader
-                              ? 'bg-gold-500 text-stadium-980 font-black shadow-sm'
-                              : row.position === 2
-                              ? 'bg-slate-700/60 text-slate-200'
-                              : 'text-slate-400 font-mono'
-                          }`}
-                        >
-                          {row.position}
-                        </span>
-                      </div>
+                    <td className="py-3 px-3 sm:px-4 text-center">
+                      <span
+                        className={`inline-flex items-center justify-center w-6 h-6 rounded-badge text-xs font-bold ${
+                          isLeader
+                            ? 'bg-gold-500 text-stadium-980'
+                            : 'text-[#9EA4AD]'
+                        }`}
+                      >
+                        {row.position}
+                      </span>
                     </td>
 
                     {/* Team */}
-                    <td className="py-3.5 px-3 sm:px-4">
+                    <td className="py-3 px-3 sm:px-4">
                       <div className="flex items-center gap-3">
                         <TeamBadge team={row.team} size="sm" />
                         <div>
-                          <span className="font-display font-bold text-slate-100 group-hover:text-gold-400 transition-colors block text-xs sm:text-sm tracking-tight">
+                          <span className="font-display font-bold text-white group-hover:text-gold-400 transition-colors block text-xs sm:text-sm uppercase">
                             {row.team.name}
                           </span>
-                          <span className="text-[10px] text-slate-400 sm:hidden font-mono">
+                          <span className="text-[10px] text-[#9EA4AD] sm:hidden">
                             Mgr: {row.team.manager_name}
                           </span>
                         </div>
@@ -95,67 +91,67 @@ export const LeagueTable: React.FC<LeagueTableProps> = ({
                     </td>
 
                     {/* Played */}
-                    <td className="py-3.5 px-2 sm:px-3 text-center font-mono text-slate-300">
+                    <td className="py-3 px-2 sm:px-3 text-center text-[#F4F4F0]">
                       {row.played}
                     </td>
 
-                    {/* Wins, Draws, Losses (Full view) */}
+                    {/* Full stats */}
                     {!isCompact && (
                       <>
-                        <td className="py-3.5 px-2 sm:px-3 text-center font-mono text-slate-200 hidden sm:table-cell">
+                        <td className="py-3 px-2 sm:px-3 text-center text-[#F4F4F0] hidden sm:table-cell">
                           {row.won}
                         </td>
-                        <td className="py-3.5 px-2 sm:px-3 text-center font-mono text-slate-400 hidden sm:table-cell">
+                        <td className="py-3 px-2 sm:px-3 text-center text-[#9EA4AD] hidden sm:table-cell">
                           {row.drawn}
                         </td>
-                        <td className="py-3.5 px-2 sm:px-3 text-center font-mono text-slate-400 hidden sm:table-cell">
+                        <td className="py-3 px-2 sm:px-3 text-center text-[#9EA4AD] hidden sm:table-cell">
                           {row.lost}
                         </td>
-                        <td className="py-3.5 px-2 sm:px-3 text-center font-mono text-slate-200 hidden md:table-cell">
+                        <td className="py-3 px-2 sm:px-3 text-center text-[#F4F4F0] hidden md:table-cell">
                           {row.goals_for}
                         </td>
-                        <td className="py-3.5 px-2 sm:px-3 text-center font-mono text-slate-400 hidden md:table-cell">
+                        <td className="py-3 px-2 sm:px-3 text-center text-[#9EA4AD] hidden md:table-cell">
                           {row.goals_against}
                         </td>
                       </>
                     )}
 
                     {/* Goal Difference */}
-                    <td className="py-3.5 px-2 sm:px-3 text-center font-mono">
+                    <td className="py-3 px-2 sm:px-3 text-center">
                       <span
-                        className={`font-semibold ${
+                        className={
                           row.goal_difference > 0
-                            ? 'text-emerald-400'
+                            ? 'text-pitch-500 font-bold'
                             : row.goal_difference < 0
-                            ? 'text-rose-400'
-                            : 'text-slate-400'
-                        }`}
+                            ? 'text-rose-400 font-bold'
+                            : 'text-[#9EA4AD]'
+                        }
                       >
                         {row.goal_difference > 0 ? `+${row.goal_difference}` : row.goal_difference}
                       </span>
                     </td>
 
                     {/* Points */}
-                    <td className="py-3.5 px-3 sm:px-4 text-center font-mono font-black text-sm sm:text-base text-gold-400">
+                    <td className="py-3 px-3 sm:px-4 text-center font-bold text-sm text-gold-400">
                       {row.points}
                     </td>
 
                     {/* Form */}
                     {!isCompact && (
-                      <td className="py-3.5 px-3 sm:px-4 text-center hidden lg:table-cell">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="py-3 px-3 sm:px-4 text-center hidden lg:table-cell">
+                        <div className="flex items-center justify-center gap-1">
                           {row.form.length === 0 ? (
-                            <span className="text-[10px] text-slate-400 font-mono">-</span>
+                            <span className="text-[10px] text-[#9EA4AD]">-</span>
                           ) : (
                             row.form.slice(-5).map((res, i) => (
                               <span
                                 key={i}
-                                className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-black font-mono shadow-sm ${
+                                className={`w-5 h-5 rounded-badge text-[10px] font-bold flex items-center justify-center ${
                                   res === 'W'
-                                    ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/50'
+                                    ? 'bg-pitch-600/20 text-pitch-400 border border-pitch-600/40'
                                     : res === 'D'
-                                    ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50'
-                                    : 'bg-rose-500/25 text-rose-300 border border-rose-500/50'
+                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                                 }`}
                               >
                                 {res}
@@ -168,7 +164,7 @@ export const LeagueTable: React.FC<LeagueTableProps> = ({
 
                     {/* Indicator */}
                     {onTeamClick && (
-                      <td className="py-3.5 px-2 text-right">
+                      <td className="py-3 px-2 text-right">
                         <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-gold-400 group-hover:translate-x-0.5 transition-transform" />
                       </td>
                     )}
@@ -180,19 +176,15 @@ export const LeagueTable: React.FC<LeagueTableProps> = ({
         </table>
       </div>
 
-      {/* Legend Footer */}
-      <div className="px-5 py-3 bg-stadium-950 border-t border-stadium-800 flex flex-wrap items-center justify-between text-[11px] text-slate-400 font-mono">
-        <div className="flex items-center gap-4">
+      {/* Legend */}
+      <div className="px-4 py-2.5 bg-stadium-950 border-t border-stadium-800 flex flex-wrap items-center justify-between text-[11px] text-[#9EA4AD] font-mono">
+        <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-gold-400" />
             1st Place: Tournament Winner
           </span>
-          <span className="flex items-center gap-1.5 hidden sm:inline-flex">
-            <span className="w-2 h-2 rounded-full bg-slate-500" />
-            2nd–6th: Single Round-Robin
-          </span>
         </div>
-        <span>Tie-Breaker: Points → Goal Difference → Goals For</span>
+        <span>Tie-Breakers: Points → Goal Difference → Goals For</span>
       </div>
     </div>
   );

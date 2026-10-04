@@ -9,48 +9,43 @@ export default {
     extend: {
       colors: {
         stadium: {
-          980: '#030508',
-          950: '#06080d',
-          900: '#0b0e14',
-          850: '#10141e',
-          800: '#151b28',
-          750: '#1c2436',
-          700: '#263147',
-          600: '#384661',
-          500: '#4e5f80',
-          400: '#71809d',
-          300: '#9aa7be',
-          200: '#cbd4e2',
-          100: '#eef2f7',
+          980: '#040508',
+          950: '#07090D', // Primary background
+          900: '#10141A', // Secondary background
+          850: '#151B24', // Surface
+          800: '#1C2430', // Elevated
+          750: '#232E3E',
+          700: '#2D3A4F',
+          600: '#3E4F6B',
+          500: '#546A8C',
+          400: '#7E90AA',
+          300: '#9EA4AD', // Muted text
+          200: '#CBD1DA',
+          100: '#F4F4F0', // Warm white primary text
         },
         gold: {
-          300: '#fde68a',
-          400: '#fcd34d',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
+          400: '#E5A93C', // Championship gold (used sparingly)
+          500: '#D97706',
+          600: '#B45309',
         },
         pitch: {
-          400: '#34d399',
-          500: '#10b981',
+          400: '#34D399',
+          500: '#10B981', // Deep pitch green
           600: '#059669',
-          700: '#047857',
         }
       },
       fontFamily: {
-        display: ['Outfit', 'Cabinet Grotesk', 'Syne', 'sans-serif'],
+        display: ['Cabinet Grotesk', 'Outfit', 'sans-serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       boxShadow: {
-        'broadcast': '0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.05)',
-        'floodlight': '0 -30px 80px 10px rgba(16, 185, 129, 0.08), 0 20px 80px 10px rgba(56, 189, 248, 0.06)',
-        'gold-glow': '0 0 25px rgba(245, 158, 11, 0.25)',
-        'pitch-glow': '0 0 25px rgba(16, 185, 129, 0.2)',
+        'broadcast': '0 4px 20px -2px rgba(0, 0, 0, 0.7)',
+        'broadcast-sm': '0 2px 8px -1px rgba(0, 0, 0, 0.5)',
       },
-      letterSpacing: {
-        'broadcast': '0.22em',
-        'broadcast-wide': '0.35em',
+      borderRadius: {
+        'card': '8px',
+        'badge': '4px',
       }
     },
   },
