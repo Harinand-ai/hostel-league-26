@@ -31,7 +31,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
 
         if (error) {
           // If Supabase rejected, check if offline admin credentials used
-          if (email === 'admin@hostelleague26.com' && password === 'admin123') {
+          if (email.trim().toLowerCase() === 'admin@hostelleague26.com' && password === 'HostelAdmin@2026') {
             localStorage.setItem('hl26_admin_auth', 'true');
             onLoginSuccess();
             return;
@@ -42,15 +42,15 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         localStorage.setItem('hl26_admin_auth', 'true');
         onLoginSuccess();
       } else {
-        // Local mode authentication fallback
+        // Local/Production authentication
         if (
-          (email.trim().toLowerCase() === 'admin@hostelleague26.com' || email.trim().toLowerCase() === 'admin') &&
-          password.trim() === 'admin123'
+          email.trim().toLowerCase() === 'admin@hostelleague26.com' &&
+          password === 'HostelAdmin@2026'
         ) {
           localStorage.setItem('hl26_admin_auth', 'true');
           onLoginSuccess();
         } else {
-          setErrorMsg('Invalid credentials. For local testing, use: admin@hostelleague26.com / admin123');
+          setErrorMsg('Invalid email or password. Please check your administrator credentials.');
         }
       }
     } catch (err: any) {
@@ -85,22 +85,10 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         </p>
       </div>
 
-      {/* Supabase status indicator */}
-      <div className="mb-6 p-3 rounded-lg bg-stadium-950/70 border border-stadium-800 text-[11px] flex items-center gap-2">
-        {isSupabaseConfigured ? (
-          <>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span className="text-emerald-400 font-mono">Supabase Auth Connected</span>
-          </>
-        ) : (
-          <>
-            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-            <div className="text-slate-400 font-mono">
-              <span className="text-amber-400 font-semibold">Demo Mode: </span>
-              admin@hostelleague26.com / admin123
-            </div>
-          </>
-        )}
+      {/* Security badge */}
+      <div className="mb-6 p-2.5 rounded-lg bg-stadium-950/70 border border-stadium-800 text-[11px] flex items-center justify-center gap-2 text-slate-400 font-mono">
+        <Lock className="w-3.5 h-3.5 text-pitch-400" />
+        <span>Secure Administrator Authentication</span>
       </div>
 
       {/* Error alert */}

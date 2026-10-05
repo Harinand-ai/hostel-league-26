@@ -9,29 +9,39 @@ export default {
     extend: {
       colors: {
         stadium: {
-          980: '#040508',
-          950: '#07090D', // Primary background
-          900: '#10141A', // Secondary background
-          850: '#151B24', // Surface
-          800: '#1C2430', // Elevated
-          750: '#232E3E',
-          700: '#2D3A4F',
-          600: '#3E4F6B',
-          500: '#546A8C',
-          400: '#7E90AA',
-          300: '#9EA4AD', // Muted text
-          200: '#CBD1DA',
-          100: '#F4F4F0', // Warm white primary text
+          980: '#030509',
+          950: '#06090F', // Ultra deep cyber black background
+          900: '#0C111C', // Secondary dark surface
+          850: '#121A2A', // Elevated card surface
+          800: '#182337', // Elevated border
+          750: '#212E47',
+          700: '#2C3D5D',
+          600: '#3D537D',
+          500: '#526E9F',
+          400: '#7995C2',
+          300: '#9DB3D6', // Crisp secondary text
+          200: '#CAD7EC',
+          100: '#F4F7FC', // Crisp white primary text
         },
         gold: {
-          400: '#E5A93C', // Championship gold (used sparingly)
-          500: '#D97706',
-          600: '#B45309',
+          300: '#FFF066',
+          400: '#FFE600', // Electric neon gold
+          500: '#FFC700',
+          600: '#E6A800',
         },
         pitch: {
-          400: '#34D399',
-          500: '#10B981', // Deep pitch green
-          600: '#059669',
+          300: '#5CFFAC',
+          400: '#00FF85', // Electric cyber neon green
+          500: '#00E575',
+          600: '#00B359',
+          950: '#021F12',
+        },
+        neon: {
+          green: '#00FF85',
+          cyan: '#00F0FF',
+          gold: '#FFE600',
+          pink: '#FF007F',
+          purple: '#A855F7',
         }
       },
       fontFamily: {
@@ -40,12 +50,16 @@ export default {
         mono: ['JetBrains Mono', 'monospace'],
       },
       boxShadow: {
-        'broadcast': '0 4px 20px -2px rgba(0, 0, 0, 0.7)',
-        'broadcast-sm': '0 2px 8px -1px rgba(0, 0, 0, 0.5)',
+        'broadcast': '0 8px 32px -4px rgba(0, 0, 0, 0.85), 0 0 1px 1px rgba(255, 255, 255, 0.05)',
+        'broadcast-sm': '0 4px 16px -2px rgba(0, 0, 0, 0.7)',
+        'neon-green': '0 0 25px -4px rgba(0, 255, 133, 0.5)',
+        'neon-cyan': '0 0 25px -4px rgba(0, 240, 255, 0.5)',
+        'neon-gold': '0 0 25px -4px rgba(255, 230, 0, 0.45)',
+        'neon-glow': '0 0 15px 0 rgba(0, 255, 133, 0.3)',
       },
       borderRadius: {
-        'card': '8px',
-        'badge': '4px',
+        'card': '12px',
+        'badge': '6px',
       }
     },
   },

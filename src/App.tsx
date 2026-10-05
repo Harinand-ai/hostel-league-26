@@ -22,11 +22,14 @@ import { StatsPage } from './pages/StatsPage';
 import { MatchDetailPage } from './pages/MatchDetailPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { QuickViewPage } from './pages/QuickViewPage';
+import { MobileBottomNav } from './components/MobileBottomNav';
 
 export function App() {
   // Navigation & Routing state
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [activeParam, setActiveParam] = useState<string | undefined>(undefined);
+  const [returnTarget, setReturnTarget] = useState<{ tab: string; param?: string }>({ tab: 'home' });
 
   // Intro state (persisted in localStorage or controlled via URL)
   const [showIntro, setShowIntro] = useState<boolean>(() => {
@@ -100,16 +103,43 @@ export function App() {
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
+  const getReturnLabel = (tab: string) => {
+    switch (tab) {
+      case 'team-detail':
+        return 'Team Details';
+      case 'match-detail':
+        return 'Match Details';
+      case 'fixtures':
+        return 'Fixtures';
+      case 'results':
+        return 'Results';
+      case 'table':
+        return 'League Table';
+      case 'stats':
+        return 'Statistics';
+      case 'admin':
+        return 'Admin Panel';
+      default:
+        return 'Broadcast Hub';
+    }
+  };
+
   const handleNavigate = (tab: string, param?: string) => {
+    if (tab === 'quick-view' && currentTab !== 'quick-view') {
+      setReturnTarget({ tab: currentTab, param: activeParam });
+    }
     setCurrentTab(tab);
     setActiveParam(param);
     window.location.hash = param ? `${tab}/${param}` : tab;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleIntroComplete = () => {
+  const handleIntroComplete = (targetTab?: string) => {
     setShowIntro(false);
     localStorage.setItem('hl26_seen_intro', 'true');
+    if (targetTab) {
+      handleNavigate(targetTab);
+    }
   };
 
   const handleReplayIntro = () => {
@@ -262,6 +292,14 @@ export function App() {
           />
         );
 
+      case 'quick-view':
+        return (
+          <QuickViewPage
+            onReturn={() => handleNavigate(returnTarget.tab || 'home', returnTarget.param)}
+            returnLabel={getReturnLabel(returnTarget.tab)}
+          />
+        );
+
       default:
         return (
           <HomePage
@@ -292,7 +330,7 @@ export function App() {
       />
 
       {/* Main Page Body with Seamless Page Transition */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 md:py-12 pb-24 md:pb-12">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentTab + (activeParam || '')}
@@ -308,6 +346,12 @@ export function App() {
 
       {/* Footer */}
       <Footer onNavigate={handleNavigate} />
+
+      {/* Mobile Floating Bottom Bar for Handheld Phones */}
+      <MobileBottomNav
+        currentTab={currentTab}
+        onNavigate={handleNavigate}
+      />
 
     </div>
   );

@@ -98,15 +98,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right actions: Audio Toggle, Replay Intro & discreet Admin button */}
           <div className="hidden md:flex items-center gap-2 font-mono">
             {/* Quick Tournament Overview Bridge */}
-            <a
-              href="https://hostelleague.vercel.app/"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-badge text-xs font-mono font-bold text-pitch-400 hover:text-white bg-pitch-950/40 hover:bg-pitch-900/60 border border-pitch-800/60 transition-colors"
-              title="Quick Tournament Overview"
+            <button
+              onClick={() => onNavigate('quick-view')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-badge text-xs font-mono font-bold transition-all ${
+                currentTab === 'quick-view'
+                  ? 'bg-pitch-500 text-stadium-950 shadow-pitch-glow'
+                  : 'text-pitch-400 hover:text-white bg-pitch-950/40 hover:bg-pitch-900/60 border border-pitch-800/60'
+              }`}
+              title="Quick Tournament Overview with Return"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-pitch-500 animate-pulse" />
+              <span className={`w-1.5 h-1.5 rounded-full ${currentTab === 'quick-view' ? 'bg-stadium-950' : 'bg-pitch-500 animate-pulse'}`} />
               <span>QUICK VIEW</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
+            </button>
 
             {/* Audio Toggle */}
             <button
@@ -195,16 +199,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Tournament Overview Bridge */}
           <div className="pt-3 pb-1 border-t border-stadium-800 mt-2">
-            <a
-              href="https://hostelleague.vercel.app/"
-              className="flex items-center justify-between p-3 rounded-badge bg-pitch-950/40 border border-pitch-800/60 text-xs font-mono font-bold text-pitch-400 hover:text-white transition-colors"
+            <button
+              onClick={() => {
+                onNavigate('quick-view');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-between p-3 rounded-badge bg-pitch-950/40 border border-pitch-800/60 text-xs font-mono font-bold text-pitch-400 hover:text-white transition-colors"
             >
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-pitch-500 animate-pulse" />
                 <span>QUICK TOURNAMENT VIEW</span>
               </div>
               <ArrowUpRight className="w-4 h-4" />
-            </a>
+            </button>
           </div>
 
           <div className="pt-2 flex items-center justify-between px-1">

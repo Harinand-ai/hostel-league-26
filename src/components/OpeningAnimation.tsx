@@ -6,7 +6,7 @@ import { audioService } from '../services/audioService';
 import { FastForward, Volume2, VolumeX, Shield, ArrowRight } from 'lucide-react';
 
 interface OpeningAnimationProps {
-  onComplete: () => void;
+  onComplete: (targetTab?: string) => void;
 }
 
 export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }) => {
@@ -46,7 +46,7 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
     completedRef.current = true;
     audioService.playBroadcastHit();
     localStorage.setItem('hl26_seen_intro', 'true');
-    window.location.href = 'https://hostelleague.vercel.app/';
+    onComplete('quick-view');
   };
 
   const handleSkipToTransition = () => {

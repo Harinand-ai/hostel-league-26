@@ -74,14 +74,14 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Quick Tournament Overview Layer Bridge */}
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <a
-              href="https://hostelleague.vercel.app/"
+            <button
+              onClick={() => onNavigate('quick-view')}
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-badge bg-pitch-950/40 hover:bg-pitch-900/60 border border-pitch-800/60 text-xs font-mono font-bold text-pitch-400 hover:text-white transition-colors"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-pitch-500 animate-pulse" />
               <span>QUICK TOURNAMENT VIEW</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
+            </button>
             <span className="text-[11px] font-mono text-[#9EA4AD]">
               Instant fixtures, standings & committee contacts
             </span>
@@ -227,13 +227,13 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* Quick Tournament Overview layer bridge */}
         <div className="pt-2 px-1 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-[#9EA4AD]">
           <span>Need the lightweight match schedule and committee contacts?</span>
-          <a
-            href="https://hostelleague.vercel.app/"
-            className="inline-flex items-center gap-1.5 text-pitch-400 hover:text-white font-bold transition-colors"
+          <button
+            onClick={() => onNavigate('quick-view')}
+            className="inline-flex items-center gap-1.5 text-pitch-400 hover:text-white font-bold transition-colors cursor-pointer"
           >
             <span>Open Quick Tournament View</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
-          </a>
+          </button>
         </div>
       </section>
 

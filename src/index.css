@@ -3,41 +3,75 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    background-color: #07090D;
-    color: #F4F4F0;
+    background-color: #06090F;
+    color: #F4F7FC;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-image: 
-      radial-gradient(circle at 50% 0%, rgba(28, 36, 48, 0.4) 0%, transparent 60%);
+      radial-gradient(circle at 15% 0%, rgba(0, 255, 133, 0.08) 0%, transparent 45%),
+      radial-gradient(circle at 85% 0%, rgba(0, 240, 255, 0.07) 0%, transparent 45%),
+      radial-gradient(circle at 50% 100%, rgba(255, 230, 0, 0.03) 0%, transparent 50%);
     background-attachment: fixed;
+    min-height: 100vh;
   }
 }
 
-/* Restrained Sports Scrollbar */
+/* Neon Glow Utilities */
+.neon-glow-green {
+  box-shadow: 0 0 20px -3px rgba(0, 255, 133, 0.35);
+}
+
+.neon-glow-cyan {
+  box-shadow: 0 0 20px -3px rgba(0, 240, 255, 0.35);
+}
+
+.neon-glow-gold {
+  box-shadow: 0 0 20px -3px rgba(255, 230, 0, 0.35);
+}
+
+.neon-text-green {
+  text-shadow: 0 0 12px rgba(0, 255, 133, 0.6);
+}
+
+.neon-text-gold {
+  text-shadow: 0 0 12px rgba(255, 230, 0, 0.6);
+}
+
+/* Pitch / Field Texture */
+.pitch-lines {
+  background-image: 
+    linear-gradient(rgba(0, 255, 133, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 133, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Custom Sports Neon Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #07090D;
+  background: #06090F;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1C2430;
-  border-radius: 2px;
+  background: #182337;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2D3A4F;
+  background: #00FF85;
 }
 
-/* Subtle Pitch Lines Texture */
-.pitch-lines {
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 80px 80px;
+/* Mobile Safe Area Bottom Padding Helper */
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
 /* Accessibility: Reduced Motion */
