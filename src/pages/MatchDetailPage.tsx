@@ -4,6 +4,7 @@ import { Match, Team, Goal, Assist, ManOfTheMatch, Player } from '../types/tourn
 import { TeamBadge } from '../components/TeamBadge';
 import { Calendar, Clock, MapPin, Award, ArrowLeft, Shield } from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
+import { POTMPollCard } from '../components/POTMPollCard';
 
 interface MatchDetailPageProps {
   matchId: string;
@@ -185,6 +186,15 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
               {match.venue ? match.venue : <span>VENUE TBA</span>}
             </span>
           </div>
+
+          {/* Match Officials */}
+          <div className="mt-3 pt-3 border-t border-stadium-850/80 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[11px] text-slate-400 font-mono">
+            <span>REFEREE: <strong className="text-slate-200">{match.referee || 'TBA'}</strong></span>
+            <span className="text-stadium-700">•</span>
+            <span>LINE REF 1: <strong className="text-slate-200">{match.assistant_referee_1 || 'TBA'}</strong></span>
+            <span className="text-stadium-700">•</span>
+            <span>LINE REF 2: <strong className="text-slate-200">{match.assistant_referee_2 || 'TBA'}</strong></span>
+          </div>
         </div>
 
       </div>
@@ -215,6 +225,14 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
           </div>
         </motion.div>
       )}
+
+      {/* PLAYER OF THE MATCH (POTM) FAN POLL */}
+      <POTMPollCard
+        matchId={match.id}
+        players={players}
+        teams={teams}
+      />
+
 
       {/* ANIMATED GOAL EVENT TIMELINE */}
       {isCompleted && (

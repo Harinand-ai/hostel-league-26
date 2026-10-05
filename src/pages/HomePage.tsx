@@ -5,7 +5,8 @@ import { ResultCard } from '../components/ResultCard';
 import { LeagueTable } from '../components/LeagueTable';
 import { TopScorers } from '../components/TopScorers';
 import { EmptyState } from '../components/EmptyState';
-import { Trophy, ArrowRight, Shield, ArrowUpRight } from 'lucide-react';
+import { CommitteeSection } from '../components/CommitteeSection';
+import { Trophy, ArrowRight, Shield, ArrowUpRight, BookOpen } from 'lucide-react';
 
 interface HomePageProps {
   teams: Team[];
@@ -237,6 +238,34 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* 6. TOURNAMENT RULES & REGULATIONS PROMPT BANNER */}
+      <section className="p-6 rounded-2xl bg-gradient-to-r from-stadium-900 via-[#0a0f1c] to-stadium-900 border border-stadium-750 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-broadcast">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0">
+            <BookOpen className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-display font-black text-lg text-white uppercase tracking-tight">
+              OFFICIAL RULES & REGULATIONS
+            </h3>
+            <p className="text-xs text-slate-400 font-mono mt-0.5">
+              Review all 12 official statutes covering 6's format, substitutions, disciplinary rules, and penalties.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => onNavigate('rules')}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold-500 hover:bg-gold-600 text-stadium-980 font-mono font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap shadow-md cursor-pointer"
+        >
+          <span>READ 12 RULES</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      </section>
+
+      {/* 7. TOURNAMENT COMMITTEE (Section 17) */}
+      <CommitteeSection />
+
     </div>
   );
 };
+

@@ -20,15 +20,41 @@ import { TeamsPage } from './pages/TeamsPage';
 import { TeamDetailPage } from './pages/TeamDetailPage';
 import { StatsPage } from './pages/StatsPage';
 import { MatchDetailPage } from './pages/MatchDetailPage';
+import { RulesPage } from './pages/RulesPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { QuickViewPage } from './pages/QuickViewPage';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
+
+
+const getInitialNav = (): { tab: string; param?: string } => {
+  if (typeof window === 'undefined') return { tab: 'quick-view' };
+  
+  // 1. Check URL hash (e.g. #quick-view, #fixtures)
+  const hash = window.location.hash.replace('#', '').trim();
+  if (hash) {
+    const [tab, param] = hash.split('/');
+    if (tab) return { tab, param };
+  }
+  
+  // 2. Check localStorage saved tab
+  const savedTab = localStorage.getItem('hl26_active_tab');
+  const savedParam = localStorage.getItem('hl26_active_param') || undefined;
+  if (savedTab) {
+    return { tab: savedTab, param: savedParam };
+  }
+  
+  // 3. Default to the original live score & quick access page
+  return { tab: 'quick-view' };
+};
 
 export function App() {
-  // Navigation & Routing state
-  const [currentTab, setCurrentTab] = useState<string>('home');
-  const [activeParam, setActiveParam] = useState<string | undefined>(undefined);
+  const initialNav = useMemo(() => getInitialNav(), []);
+
+  // Navigation & Routing state (restores on page reload or moving away)
+  const [currentTab, setCurrentTab] = useState<string>(initialNav.tab);
+  const [activeParam, setActiveParam] = useState<string | undefined>(initialNav.param);
   const [returnTarget, setReturnTarget] = useState<{ tab: string; param?: string }>({ tab: 'home' });
 
   // Intro state (persisted in localStorage or controlled via URL)
@@ -41,6 +67,7 @@ export function App() {
     }
     return !localStorage.getItem('hl26_seen_intro');
   });
+
 
   // Admin login session state
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
@@ -86,7 +113,7 @@ export function App() {
     loadData();
   }, [loadData]);
 
-  // Handle URL hash routing if user enters directly e.g. #admin or /admin
+  // Handle URL hash routing if user enters directly e.g. #quick-view or /fixtures
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace('#', '').trim();
@@ -95,6 +122,14 @@ export function App() {
         if (tab) {
           setCurrentTab(tab);
           setActiveParam(param);
+          try {
+            localStorage.setItem('hl26_active_tab', tab);
+            if (param) {
+              localStorage.setItem('hl26_active_param', param);
+            } else {
+              localStorage.removeItem('hl26_active_param');
+            }
+          } catch {}
         }
       }
     };
@@ -117,8 +152,11 @@ export function App() {
         return 'League Table';
       case 'stats':
         return 'Statistics';
+      case 'rules':
+        return 'Rules & Regulations';
       case 'admin':
         return 'Admin Panel';
+
       default:
         return 'Broadcast Hub';
     }
@@ -130,6 +168,17 @@ export function App() {
     }
     setCurrentTab(tab);
     setActiveParam(param);
+    
+    // Save to localStorage so reload always stays on or goes back to this tab
+    try {
+      localStorage.setItem('hl26_active_tab', tab);
+      if (param) {
+        localStorage.setItem('hl26_active_param', param);
+      } else {
+        localStorage.removeItem('hl26_active_param');
+      }
+    } catch {}
+
     window.location.hash = param ? `${tab}/${param}` : tab;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -137,25 +186,50 @@ export function App() {
   const handleIntroComplete = (targetTab?: string) => {
     setShowIntro(false);
     localStorage.setItem('hl26_seen_intro', 'true');
-    if (targetTab) {
-      handleNavigate(targetTab);
-    }
+    // Default to the original live score / quick access page
+    handleNavigate(targetTab || 'quick-view');
   };
+
 
   const handleReplayIntro = () => {
     setShowIntro(true);
   };
+
+  // Check Supabase Auth session for admin status
+  useEffect(() => {
+    if (isSupabaseConfigured && supabase) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setIsAdminLoggedIn(true);
+        }
+      });
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          setIsAdminLoggedIn(true);
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, []);
 
   const handleAdminLogin = () => {
     setIsAdminLoggedIn(true);
     localStorage.setItem('hl26_admin_auth', 'true');
   };
 
-  const handleAdminLogout = () => {
+  const handleAdminLogout = async () => {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.warn('Supabase signOut error:', err);
+      }
+    }
     setIsAdminLoggedIn(false);
     localStorage.removeItem('hl26_admin_auth');
     handleNavigate('home');
   };
+
 
   // Calculated derived statistics
   const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
@@ -267,7 +341,15 @@ export function App() {
           />
         );
 
+      case 'rules':
+        return (
+          <RulesPage
+            onNavigate={handleNavigate}
+          />
+        );
+
       case 'admin':
+
         if (!isAdminLoggedIn) {
           return (
             <AdminLoginPage
@@ -347,11 +429,39 @@ export function App() {
       {/* Footer */}
       <Footer onNavigate={handleNavigate} />
 
+      {/* Floating Return Button to Original Live Score & Quick Access Page when moved away */}
+      {currentTab !== 'quick-view' && (
+        <aside
+          aria-label="Quick Access to Original Live Scores"
+          className="fixed bottom-20 md:bottom-6 right-3 sm:right-6 z-30 pointer-events-auto"
+        >
+          <motion.button
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleNavigate('quick-view')}
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-stadium-950 via-[#070d17] to-pitch-950 text-white border border-pitch-400/80 font-mono text-xs font-bold uppercase tracking-wider shadow-[0_0_25px_rgba(0,255,133,0.35)] hover:shadow-[0_0_30px_rgba(0,255,133,0.6)] backdrop-blur-md transition-all group cursor-pointer"
+            title="Return to Original Live Score & Quick Access Page"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-pitch-500 animate-pulse shadow-[0_0_8px_#00ff85]" />
+            <span className="text-pitch-400 group-hover:text-white transition-colors">
+              ORIGINAL LIVE SCORE
+            </span>
+            <span className="text-[10px] py-0.5 px-2 rounded-full bg-pitch-500/20 text-pitch-300 font-semibold border border-pitch-500/30">
+              QUICK ACCESS
+            </span>
+          </motion.button>
+        </aside>
+      )}
+
       {/* Mobile Floating Bottom Bar for Handheld Phones */}
       <MobileBottomNav
         currentTab={currentTab}
         onNavigate={handleNavigate}
       />
+
 
     </div>
   );

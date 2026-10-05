@@ -78,9 +78,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   Player Leaderboards
                 </button>
               </li>
+              <li>
+                <button onClick={() => onNavigate('rules')} className="hover:text-gold-400 text-slate-300 transition-colors">
+                  Rules & Regulations (12)
+                </button>
+              </li>
+
               <li className="pt-2">
                 <button
                   onClick={() => onNavigate('admin')}
+
                   className="inline-flex items-center gap-1.5 text-slate-400 hover:text-gold-400 transition-colors"
                 >
                   <Shield className="w-3.5 h-3.5" />

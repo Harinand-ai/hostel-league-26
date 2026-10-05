@@ -205,18 +205,35 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
               {teamPlayers.map(player => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-[#090d16] border border-stadium-750"
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-[#090d16] border border-stadium-750 hover:border-stadium-700 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-lg bg-stadium-850 text-slate-200 font-mono font-bold text-xs flex items-center justify-center border border-stadium-700">
+                    <span className={`w-8 h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center border ${
+                      player.position === 'GK'
+                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        : player.position === 'CB'
+                        ? 'bg-sky-500/15 text-sky-300 border-sky-500/30'
+                        : player.position === 'CF'
+                        ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                        : player.position === 'MID'
+                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                        : 'bg-stadium-850 text-slate-300 border-stadium-700'
+                    }`}>
                       {player.position}
                     </span>
                     <div>
-                      <span className="font-display font-black text-sm text-white block uppercase tracking-tight">
-                        {player.name}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-display font-black text-sm text-white block uppercase tracking-tight">
+                          {player.name}
+                        </span>
+                        {player.is_captain && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-black uppercase bg-gold-400 text-stadium-980 tracking-widest shadow-sm">
+                            CAPTAIN
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[11px] text-slate-400 font-mono">
-                        {player.position === 'GK' ? 'Goalkeeper' : player.position === 'DEF' ? 'Defender' : player.position === 'MID' ? 'Midfielder' : 'Forward'}
+                        {player.position === 'GK' ? 'Goalkeeper' : player.position === 'CB' ? 'Center Back' : player.position === 'MID' ? 'Midfielder' : player.position === 'CF' ? 'Center Forward' : 'Position TBD'}
                       </span>
                     </div>
                   </div>

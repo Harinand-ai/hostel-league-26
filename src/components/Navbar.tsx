@@ -26,7 +26,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'table', label: 'TABLE' },
     { id: 'teams', label: 'CLUBS' },
     { id: 'stats', label: 'STATS' },
+    { id: 'rules', label: 'RULES' },
   ];
+
 
   const handleNavClick = (id: string) => {
     onNavigate(id);
@@ -105,10 +107,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'bg-pitch-500 text-stadium-950 shadow-pitch-glow'
                   : 'text-pitch-400 hover:text-white bg-pitch-950/40 hover:bg-pitch-900/60 border border-pitch-800/60'
               }`}
-              title="Quick Tournament Overview with Return"
+              title="Quick Tournament Overview & Live Scores"
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${currentTab === 'quick-view' ? 'bg-stadium-950' : 'bg-pitch-500 animate-pulse'}`} />
-              <span>QUICK VIEW</span>
+              <span className={`w-2 h-2 rounded-full ${currentTab === 'quick-view' ? 'bg-stadium-950' : 'bg-pitch-500 animate-pulse'}`} />
+              <span>LIVE SCORES • QUICK ACCESS</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
 
@@ -208,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-pitch-500 animate-pulse" />
-                <span>QUICK TOURNAMENT VIEW</span>
+                <span>ORIGINAL LIVE SCORE & QUICK ACCESS</span>
               </div>
               <ArrowUpRight className="w-4 h-4" />
             </button>
