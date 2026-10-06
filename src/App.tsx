@@ -388,7 +388,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-900">
+    <div className="min-h-screen flex flex-col bg-[#18110a] text-[#f7eed8]">
       
       {/* Animated Opening Sequence */}
       {showIntro && (

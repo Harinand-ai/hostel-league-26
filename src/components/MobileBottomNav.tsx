@@ -11,22 +11,22 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onNavigate,
 }) => {
   const tabs = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'matches', label: 'Matches', icon: Calendar },
+    { id: 'home', label: 'HOME', icon: Home },
+    { id: 'matches', label: 'MATCH', icon: Calendar },
     {
       id: 'live',
-      label: 'Live Score',
+      label: 'LIVE',
       icon: Radio,
       isLiveLink: true,
       url: 'https://hostelleague.vercel.app/',
     },
-    { id: 'teams', label: 'Teams', icon: Shield },
-    { id: 'stats', label: 'Stats', icon: BarChart3 },
+    { id: 'teams', label: 'CLUBS', icon: Shield },
+    { id: 'stats', label: 'STATS', icon: BarChart3 },
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-2 py-1 safe-bottom shadow-lg">
-      <div className="flex items-center justify-around max-w-md mx-auto">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#2b2118] border-t-4 border-[#120d08] px-1 py-1 safe-bottom shadow-2xl">
+      <div className="flex items-center justify-around max-w-md mx-auto gap-1">
         {tabs.map(tab => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.id;
@@ -38,13 +38,11 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 href={tab.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center py-1 px-3 rounded-lg text-green-700 active:scale-95 transition-transform"
+                className="flex-1 flex flex-col items-center justify-center py-1 px-1 bg-[#801818] border-2 border-[#120d08] text-white active:scale-95 transition-transform"
                 title="Watch Live Match"
               >
-                <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shadow-xs">
-                  <Icon className="w-4 h-4 animate-pulse" />
-                </div>
-                <span className="text-[10px] font-bold mt-0.5 text-green-700">
+                <Icon className="w-4 h-4 animate-pulse text-white" />
+                <span className="text-[9px] font-black mt-0.5 tracking-tight font-display text-white">
                   {tab.label}
                 </span>
               </a>
@@ -55,12 +53,14 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <button
               key={tab.id}
               onClick={() => onNavigate(tab.id)}
-              className={`flex flex-col items-center justify-center py-1.5 px-3 min-w-[56px] transition-colors ${
-                isActive ? 'text-green-700' : 'text-slate-500 hover:text-slate-800'
+              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-[#4a7227] border-2 border-white text-[#ffff55] shadow-xs'
+                  : 'bg-[#1c150e] border-2 border-[#120d08] text-[#c7b49d] hover:bg-[#2c2219]'
               }`}
             >
-              <Icon className="w-5 h-5 stroke-[2]" />
-              <span className={`text-[10px] mt-0.5 ${isActive ? 'font-bold' : 'font-medium'}`}>
+              <Icon className="w-4 h-4" />
+              <span className={`text-[9px] font-black mt-0.5 tracking-tight font-display ${isActive ? 'text-[#ffff55]' : 'text-[#c7b49d]'}`}>
                 {tab.label}
               </span>
             </button>

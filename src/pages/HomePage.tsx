@@ -56,18 +56,18 @@ export const HomePage: React.FC<HomePageProps> = ({
   const latestAwayTeam = latestMatch ? teamsMap.get(latestMatch.away_team_id) : null;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       
       {/* 1. HOSTEL LEAGUE 26 IDENTITY */}
       <div className="text-center sm:text-left pt-1">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold tracking-wide uppercase mb-2 border border-emerald-200">
-          <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-          <span>Official Tournament Portal</span>
+        <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-[#4a7227] text-[#ffff55] border-2 border-[#150f09] text-[10px] font-black uppercase mb-1.5 shadow-xs">
+          <span className="w-1.5 h-1.5 bg-[#ffff55] animate-pulse" />
+          <span>OFFICIAL TOURNAMENT REALM</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight uppercase">
+        <h1 className="text-xl sm:text-2xl font-black mc-title-yellow uppercase leading-tight">
           HOSTEL LEAGUE 26
         </h1>
-        <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
+        <p className="text-base sm:text-lg text-[#d8c7b3] mt-0.5">
           Six Clubs • Five Rounds • Fifteen Matches • Official Records & Statistics
         </p>
       </div>
@@ -75,58 +75,58 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* 2. COMPACT LIVE MATCH SECTION */}
       {liveMatch && liveHomeTeam && liveAwayTeam ? (
         /* State A: MATCH IS LIVE */
-        <div className="bg-white rounded-xl border border-rose-200 p-4 shadow-xs">
-          <div className="flex items-center justify-between pb-2 mb-3 border-b border-rose-100">
+        <div className="bg-white p-3.5 shadow-md">
+          <div className="flex items-center justify-between pb-2 mb-2.5 border-b-2 border-[#1f1710]">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping" />
-              <span className="text-xs font-black tracking-wider uppercase text-rose-700">
+              <span className="w-2.5 h-2.5 bg-[#ff2222] animate-ping" />
+              <span className="text-[10px] font-black uppercase text-[#ff5555]">
                 LIVE NOW • MATCH LIVE
               </span>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 bg-[#801818] text-white border border-[#140e09]">
               Round {liveMatch.round_number}
             </span>
           </div>
 
           <div className="flex items-center justify-between gap-3 py-1">
             {/* Home */}
-            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <TeamBadge team={liveHomeTeam} size="md" />
               <div className="truncate">
-                <span className="font-extrabold text-sm sm:text-base text-slate-900 block truncate">
+                <span className="font-black text-sm sm:text-base text-white block truncate">
                   {liveHomeTeam.name}
                 </span>
-                <span className="text-[10px] text-slate-500">Home</span>
+                <span className="text-xs text-[#b8a58f]">Home</span>
               </div>
             </div>
 
             {/* Live Score */}
-            <div className="px-3.5 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-center shrink-0 font-black text-lg sm:text-xl text-rose-700">
+            <div className="px-3 py-1 bg-[#241c15] border-2 border-[#120d08] text-center shrink-0 font-black text-base sm:text-lg text-[#ff5555]">
               {liveMatch.home_score ?? 0} — {liveMatch.away_score ?? 0}
             </div>
 
             {/* Away */}
-            <div className="flex items-center justify-end gap-2.5 flex-1 min-w-0 text-right">
+            <div className="flex items-center justify-end gap-2 flex-1 min-w-0 text-right">
               <div className="truncate">
-                <span className="font-extrabold text-sm sm:text-base text-slate-900 block truncate">
+                <span className="font-black text-sm sm:text-base text-white block truncate">
                   {liveAwayTeam.name}
                 </span>
-                <span className="text-[10px] text-slate-500">Away</span>
+                <span className="text-xs text-[#b8a58f]">Away</span>
               </div>
               <TeamBadge team={liveAwayTeam} size="md" />
             </div>
           </div>
 
           {/* Action Footer */}
-          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-            <span className="text-[11px] text-slate-500 font-medium">
-              Real-time match centre
+          <div className="mt-3 pt-2.5 border-t-2 border-[#1f1710] flex items-center justify-between gap-2">
+            <span className="text-xs text-[#cfbeaa]">
+              Real-time match broadcast
             </span>
             <a
               href="https://hostelleague.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wide transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 mc-btn-red text-[10px] font-black uppercase tracking-wider"
             >
               <Radio className="w-3.5 h-3.5 animate-pulse" />
               <span>LIVE SCORE →</span>
@@ -135,16 +135,16 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* POTM live match sub-surface if poll active for this live match */}
           {activePoll && activePoll.match_id === liveMatch.id && (
-            <div className="mt-2.5 pt-2 border-t border-rose-100 flex items-center justify-between gap-2 bg-amber-50/70 -mx-4 -mb-4 p-3 rounded-b-xl">
+            <div className="mt-2.5 pt-2 border-t-2 border-[#1f1710] flex items-center justify-between gap-2 bg-[#42311b] -mx-3.5 -mb-3.5 p-2.5 border-t border-[#140e09]">
               <div className="flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-700 shrink-0" />
-                <span className="text-xs font-bold text-amber-900">
+                <Award className="w-4 h-4 text-[#ffaa00] shrink-0" />
+                <span className="text-xs font-bold text-[#ffff55]">
                   Player of the Match voting is open!
                 </span>
               </div>
               <button
                 onClick={() => onNavigate('match-detail', liveMatch.id)}
-                className="text-xs font-black text-amber-900 hover:text-amber-950 uppercase tracking-wide flex items-center gap-1 cursor-pointer"
+                className="text-[10px] font-black text-[#ffff55] hover:text-white uppercase flex items-center gap-1 cursor-pointer"
               >
                 <span>VOTE NOW</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -154,15 +154,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       ) : (
         /* State B: NO LIVE MATCH (COMPACT) */
-        <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 shadow-xs flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-600 shrink-0">
+        <div className="bg-white p-2.5 sm:p-3 shadow-md flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 bg-[#6b5847] shrink-0" />
+            <span className="text-[10px] font-black uppercase text-[#d5c3af] shrink-0">
               NO LIVE MATCH
             </span>
             {nextMatch && nextHomeTeam && nextAwayTeam && (
-              <span className="hidden sm:inline text-xs text-slate-500 truncate">
-                • Next: <strong className="text-slate-800 font-semibold">{nextHomeTeam.name} vs {nextAwayTeam.name}</strong>
+              <span className="hidden sm:inline text-xs text-[#b8a58f] truncate">
+                • Next: <strong className="text-[#ffff55] font-semibold">{nextHomeTeam.name} vs {nextAwayTeam.name}</strong>
               </span>
             )}
           </div>
@@ -171,31 +171,31 @@ export const HomePage: React.FC<HomePageProps> = ({
             href="https://hostelleague.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wide transition-colors shrink-0"
+            className="inline-flex items-center gap-1 px-3 py-1.5 mc-btn text-[10px] font-black uppercase tracking-wide shrink-0"
           >
             <span>LIVE SCORE</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3 h-3" />
           </a>
         </div>
       )}
 
       {/* 3. VOTE NOW — COMPACT POTM SURFACE IF ACTIVE */}
       {activePoll && (
-        <div className="bg-amber-50/90 border border-amber-200 rounded-xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
-              <Award className="w-5 h-5 text-amber-700" />
+        <div className="bg-[#3e2e1c] border-3 border-[#120d08] p-3 shadow-md flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 bg-[#63481a] border-2 border-[#120d08] flex items-center justify-center shrink-0">
+              <Award className="w-4 h-4 text-[#ffff55]" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-black uppercase tracking-wider text-amber-900">
+                <span className="text-[10px] font-black uppercase text-[#ffff55]">
                   PLAYER OF THE MATCH
                 </span>
-                <span className="text-[9px] font-extrabold bg-amber-200 text-amber-900 px-1.5 py-0.2 rounded uppercase">
+                <span className="text-[8px] font-black bg-[#ffaa00] text-black px-1 py-0.2 uppercase">
                   VOTING OPEN
                 </span>
               </div>
-              <p className="text-xs text-amber-800 font-medium mt-0.5 truncate">
+              <p className="text-xs text-[#f2e2ce] mt-0.5 truncate">
                 {pollMatch && pollHomeTeam && pollAwayTeam
                   ? `Who was the best player in ${pollHomeTeam.name} vs ${pollAwayTeam.name}?`
                   : "Who was today's best player?"}
@@ -205,26 +205,26 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           <button
             onClick={() => onNavigate('match-detail', activePoll.match_id)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-xs shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1 px-3 py-2 mc-btn-gold text-[10px] font-black uppercase tracking-wider shrink-0 cursor-pointer"
           >
             <span>VOTE NOW</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3 h-3" />
           </button>
         </div>
       )}
 
       {/* 4. NEXT MATCH */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <div className="flex items-center justify-between pb-1">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+          <h2 className="text-[10px] font-black uppercase text-[#ffff55] flex items-center gap-1.5">
             <span>NEXT MATCH</span>
           </h2>
           <button
             onClick={() => onNavigate('matches')}
-            className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1 cursor-pointer"
+            className="text-[10px] text-[#55ff55] hover:text-[#ffff55] font-black flex items-center gap-1 cursor-pointer"
           >
             <span>All 15 Fixtures</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3 h-3" />
           </button>
         </div>
 
@@ -236,24 +236,24 @@ export const HomePage: React.FC<HomePageProps> = ({
             onClick={() => onNavigate('match-detail', nextMatch.id)}
           />
         ) : (
-          <div className="p-5 text-center bg-white rounded-xl border border-slate-200 text-slate-500 text-xs">
+          <div className="p-4 text-center bg-white text-[#cfbeaa] text-xs">
             All tournament fixtures concluded.
           </div>
         )}
       </section>
 
       {/* 5. LATEST RESULT */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <div className="flex items-center justify-between pb-1">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+          <h2 className="text-[10px] font-black uppercase text-[#ffff55] flex items-center gap-1.5">
             <span>LATEST RESULT</span>
           </h2>
           <button
             onClick={() => onNavigate('matches')}
-            className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1 cursor-pointer"
+            className="text-[10px] text-[#55ff55] hover:text-[#ffff55] font-black flex items-center gap-1 cursor-pointer"
           >
             <span>Past Matches</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3 h-3" />
           </button>
         </div>
 
@@ -265,65 +265,65 @@ export const HomePage: React.FC<HomePageProps> = ({
             onClick={() => onNavigate('match-detail', latestMatch.id)}
           />
         ) : (
-          <div className="p-5 text-center bg-white rounded-xl border border-slate-200 text-slate-500 text-xs">
+          <div className="p-4 text-center bg-white text-[#cfbeaa] text-xs">
             No completed matches recorded yet.
           </div>
         )}
       </section>
 
       {/* 6. MINIMAL TOURNAMENT INFORMATION */}
-      <section className="p-4 sm:p-5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+      <section className="p-3.5 bg-white space-y-3">
+        <h2 className="text-[10px] font-black uppercase text-[#ffff55]">
           TOURNAMENT INFORMATION
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Clubs</span>
-            <span className="text-base font-bold text-slate-900 mt-0.5 block">6 TEAMS</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div className="p-2 mc-slot">
+            <span className="text-[9px] font-bold text-[#b5a38f] uppercase block">Clubs</span>
+            <span className="text-sm font-black text-white mt-0.5 block">6 TEAMS</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Schedule</span>
-            <span className="text-base font-bold text-emerald-700 mt-0.5 block">15 MATCHES</span>
+          <div className="p-2 mc-slot">
+            <span className="text-[9px] font-bold text-[#b5a38f] uppercase block">Schedule</span>
+            <span className="text-sm font-black text-[#55ff55] mt-0.5 block">15 MATCHES</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Format</span>
-            <span className="text-base font-bold text-slate-900 mt-0.5 block">5 ROUNDS</span>
+          <div className="p-2 mc-slot">
+            <span className="text-[9px] font-bold text-[#b5a38f] uppercase block">Format</span>
+            <span className="text-sm font-black text-white mt-0.5 block">5 ROUNDS</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Points</span>
-            <span className="text-base font-bold text-slate-900 mt-0.5 block">W 3 • D 1 • L 0</span>
+          <div className="p-2 mc-slot">
+            <span className="text-[9px] font-bold text-[#b5a38f] uppercase block">Points</span>
+            <span className="text-sm font-black text-[#ffaa00] mt-0.5 block">W 3 • D 1 • L 0</span>
           </div>
         </div>
 
         {/* Quick Navigation Shortcuts */}
-        <div className="pt-2 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+        <div className="pt-2 border-t-2 border-[#1f1710] grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
           <button
             onClick={() => onNavigate('matches')}
-            className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 py-1.5 px-2 mc-btn text-[9px] font-black uppercase"
           >
-            <Trophy className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Fixtures & Results</span>
+            <Trophy className="w-3 h-3 text-[#55ff55]" />
+            <span>Fixtures</span>
           </button>
           <button
             onClick={() => onNavigate('teams')}
-            className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 py-1.5 px-2 mc-btn text-[9px] font-black uppercase"
           >
-            <Shield className="w-3.5 h-3.5 text-blue-600" />
-            <span>Official Squads</span>
+            <Shield className="w-3 h-3 text-[#55ffff]" />
+            <span>Squads</span>
           </button>
           <button
             onClick={() => onNavigate('stats')}
-            className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 py-1.5 px-2 mc-btn text-[9px] font-black uppercase"
           >
-            <Award className="w-3.5 h-3.5 text-amber-600" />
+            <Award className="w-3 h-3 text-[#ffaa00]" />
             <span>Leaderboard</span>
           </button>
           <button
             onClick={() => onNavigate('rules')}
-            className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 py-1.5 px-2 mc-btn text-[9px] font-black uppercase"
           >
-            <FileText className="w-3.5 h-3.5 text-slate-600" />
-            <span>Tournament Rules</span>
+            <FileText className="w-3 h-3 text-slate-300" />
+            <span>Rules</span>
           </button>
         </div>
       </section>

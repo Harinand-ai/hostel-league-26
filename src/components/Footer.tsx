@@ -8,52 +8,52 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="w-full bg-slate-100 border-t border-slate-200 text-slate-600 mt-16 pb-16 md:pb-6">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+    <footer className="w-full bg-[#241a12] border-t-4 border-[#120d08] text-[#c7b49d] mt-16 pb-16 md:pb-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           
           {/* Brand info */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-md bg-green-700 flex items-center justify-center text-white font-bold text-xs">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-[#4a7227] border-2 border-[#120d08] flex items-center justify-center text-[#ffff55] font-bold text-xs">
                 <Trophy className="w-3.5 h-3.5" />
               </div>
-              <span className="font-extrabold text-slate-900 text-base">
+              <span className="font-black text-white text-xs mc-title-yellow">
                 HOSTEL LEAGUE 26
               </span>
             </div>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Official tournament record and match centre. Six clubs, five rounds, fifteen matches.
+            <p className="text-sm text-[#a89680]">
+              Official tournament record. Six clubs, five rounds, fifteen matches.
             </p>
             <div className="pt-1">
               <a
                 href="https://hostelleague.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-600 text-white text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 mc-btn-red text-[10px] font-black uppercase tracking-wider"
               >
                 <Radio className="w-3.5 h-3.5" />
-                <span>Go to Live Match</span>
+                <span>LIVE SCORE</span>
               </a>
             </div>
           </div>
 
           {/* Clubs */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2.5">
+            <h4 className="text-[10px] font-black uppercase tracking-wider text-[#ffff55] mb-2">
               Clubs & Managers
             </h4>
-            <ul className="space-y-1.5 text-xs">
+            <ul className="space-y-1 text-sm">
               {INITIAL_TEAMS.map(team => (
                 <li key={team.id}>
                   <button
                     onClick={() => onNavigate('team-detail', team.id)}
-                    className="hover:text-green-700 text-left flex items-center justify-between w-full group py-0.5 cursor-pointer"
+                    className="hover:text-[#ffff55] text-left flex items-center justify-between w-full group py-0.5 cursor-pointer"
                   >
-                    <span className="font-semibold text-slate-700 group-hover:text-green-700">
+                    <span className="font-bold text-[#f0e4cf] group-hover:text-[#ffff55]">
                       {team.name}
                     </span>
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-xs text-[#968470]">
                       {team.manager_name}
                     </span>
                   </button>
@@ -62,53 +62,47 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* Quick links & Tournament Info */}
+          {/* Quick Shortcuts */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2.5">
-              Information & Rules
+            <h4 className="text-[10px] font-black uppercase tracking-wider text-[#ffff55] mb-2">
+              Realm Navigation
             </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <button
-                  onClick={() => onNavigate('matches')}
-                  className="hover:text-green-700 text-slate-700 font-medium transition-colors cursor-pointer"
-                >
-                  All 15 Fixtures & Results
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('stats')}
-                  className="hover:text-green-700 text-slate-700 font-medium transition-colors cursor-pointer"
-                >
-                  Top Scorers & Honors
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('rules')}
-                  className="hover:text-green-700 text-slate-700 font-medium transition-colors cursor-pointer"
-                >
-                  Official Rules (12 Regulations)
-                </button>
-              </li>
-              <li className="pt-2 border-t border-slate-200">
-                <button
-                  onClick={() => onNavigate('admin')}
-                  className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer font-medium"
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>Admin Access</span>
-                </button>
-              </li>
-            </ul>
+            <div className="flex flex-col space-y-1 text-sm">
+              <button
+                onClick={() => onNavigate('matches')}
+                className="text-left text-[#f0e4cf] hover:text-[#ffff55] flex items-center gap-1.5 cursor-pointer py-0.5"
+              >
+                <Calendar className="w-3 h-3 text-[#55ff55]" />
+                <span>All 15 Fixtures</span>
+              </button>
+              <button
+                onClick={() => onNavigate('teams')}
+                className="text-left text-[#f0e4cf] hover:text-[#ffff55] flex items-center gap-1.5 cursor-pointer py-0.5"
+              >
+                <Shield className="w-3 h-3 text-[#55ffff]" />
+                <span>Participating Squads</span>
+              </button>
+              <button
+                onClick={() => onNavigate('stats')}
+                className="text-left text-[#f0e4cf] hover:text-[#ffff55] flex items-center gap-1.5 cursor-pointer py-0.5"
+              >
+                <Trophy className="w-3 h-3 text-[#ffaa00]" />
+                <span>Standings & Golden Boot</span>
+              </button>
+              <button
+                onClick={() => onNavigate('admin-login')}
+                className="text-left text-[#968470] hover:text-white flex items-center gap-1.5 cursor-pointer py-0.5"
+              >
+                <Users className="w-3 h-3" />
+                <span>Admin Operations</span>
+              </button>
+            </div>
           </div>
 
         </div>
 
-        <div className="border-t border-slate-200 mt-8 pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
-          <p>© 2026 HOSTEL LEAGUE 26. Official Tournament Portal.</p>
-          <p className="font-medium text-slate-500">6's Football • 12 Mins Each Half</p>
+        <div className="mt-8 pt-4 border-t-2 border-[#19110a] text-center text-xs text-[#806f5e]">
+          Hostel League 26 • Minecraft Edition • All Match & Tournament Records Preserved
         </div>
       </div>
     </footer>

@@ -105,7 +105,7 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
         <div className="absolute top-4 right-4 z-20">
           <button
             onClick={handleFinish}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold uppercase tracking-wider text-white transition-colors backdrop-blur-xs cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 mc-btn text-[10px] font-black uppercase tracking-wider cursor-pointer"
           >
             <span>Skip</span>
             <FastForward className="w-3.5 h-3.5" />
@@ -125,7 +125,7 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 className="flex items-center justify-center select-none"
               >
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/95 text-slate-900 shadow-2xl flex items-center justify-center text-4xl sm:text-5xl border-2 border-slate-300">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#241c15] text-slate-100 shadow-2xl flex items-center justify-center text-4xl sm:text-5xl border-3 border-[#120d08]">
                   ⚽
                 </div>
               </motion.div>
@@ -141,11 +141,11 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
                 transition={{ duration: 0.4, ease: 'easeOut' }}
                 className="flex flex-col items-center justify-center space-y-2 select-none"
               >
-                <h1 className="text-3xl sm:text-4xl font-black text-white tracking-widest uppercase leading-tight font-display">
+                <h1 className="text-2xl sm:text-3xl font-black mc-title-yellow tracking-widest uppercase leading-tight font-display">
                   HOSTEL LEAGUE
                 </h1>
 
-                <div className="inline-block px-5 py-1.5 rounded-xl bg-emerald-600 text-white font-black text-4xl sm:text-5xl tracking-tight shadow-xl border border-emerald-400/40">
+                <div className="inline-block px-5 py-1.5 bg-[#4a7227] text-[#ffff55] font-black text-4xl sm:text-5xl tracking-tight shadow-xl border-3 border-[#120d08]">
                   26
                 </div>
               </motion.div>
@@ -159,9 +159,9 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.3 } }}
                 transition={{ duration: 0.35 }}
-                className="w-full flex flex-col items-center space-y-2 select-none max-w-[260px]"
+                className="w-full flex flex-col items-center space-y-1.5 select-none max-w-[260px]"
               >
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-emerald-400 mb-0.5 block">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ffff55] mb-0.5 block">
                   6 OFFICIAL CLUBS
                 </span>
 
@@ -172,10 +172,10 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
                       initial={{ opacity: 0, x: -15 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.06, duration: 0.25 }}
-                      className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg bg-white/10 border border-white/10 text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-1.5 mc-slot text-left"
                     >
                       <TeamBadge team={team} size="xs" />
-                      <span className="font-extrabold text-xs text-white uppercase tracking-wide truncate">
+                      <span className="font-black text-xs text-white uppercase tracking-wide truncate">
                         {team.name}
                       </span>
                     </motion.div>
