@@ -283,6 +283,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       setPollModalOpen(false);
       setSelectedPollCandidates([]);
       loadPollsData();
+      onDataChanged();
     } catch (err: any) {
       showToast(err.message || 'Error creating poll', 'error');
     }
@@ -295,6 +296,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       await tournamentService.closePoll(pollId);
       showToast('Poll closed');
       loadPollsData();
+      onDataChanged();
     } catch (err: any) {
       showToast(err.message || 'Error closing poll', 'error');
     }

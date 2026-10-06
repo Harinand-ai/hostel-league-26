@@ -197,7 +197,7 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
               </div>
               <div>
                 <span className="font-extrabold text-sm uppercase block tracking-wide">
-                  WATCH LIVE NOW
+                  LIVE SCORE
                 </span>
                 <span className="text-xs text-emerald-100">
                   Follow live pitch commentary and real-time clock

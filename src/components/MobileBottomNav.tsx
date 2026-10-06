@@ -15,7 +15,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     { id: 'matches', label: 'Matches', icon: Calendar },
     {
       id: 'live',
-      label: 'Live',
+      label: 'Live Score',
       icon: Radio,
       isLiveLink: true,
       url: 'https://hostelleague.vercel.app/',

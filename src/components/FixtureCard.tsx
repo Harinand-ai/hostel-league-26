@@ -9,6 +9,7 @@ interface FixtureCardProps {
   awayTeam: Team;
   onClick?: () => void;
   showRound?: boolean;
+  hasActivePoll?: boolean;
 }
 
 export const FixtureCard: React.FC<FixtureCardProps> = ({
@@ -17,6 +18,7 @@ export const FixtureCard: React.FC<FixtureCardProps> = ({
   awayTeam,
   onClick,
   showRound = false,
+  hasActivePoll = false,
 }) => {
   const isCompleted = match.status === 'COMPLETED';
   const isLive = match.status === 'LIVE';
@@ -37,7 +39,12 @@ export const FixtureCard: React.FC<FixtureCardProps> = ({
           )}
         </div>
 
-        <div>
+        <div className="flex items-center gap-1.5">
+          {hasActivePoll && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-tight bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
+              POTM VOTE
+            </span>
+          )}
           {isLive ? (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-green-100 text-green-800 border border-green-200">
               <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />

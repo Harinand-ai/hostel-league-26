@@ -517,6 +517,11 @@ class TournamentService {
     return polls.find(p => p.match_id === matchId) || null;
   }
 
+  async getActivePolls(): Promise<POTMPoll[]> {
+    const polls = await this.getPolls();
+    return polls.filter(p => p.status === 'active');
+  }
+
   async createPoll(matchId: string, title: string, candidatePlayerIds: string[]): Promise<POTMPoll> {
     const pollId = generateId('poll');
     const newPoll: POTMPoll = {

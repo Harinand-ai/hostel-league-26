@@ -82,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="Watch Live Match Experience"
             >
               <Radio className="w-3.5 h-3.5 animate-pulse text-white" />
-              <span>LIVE</span>
+              <span>LIVE SCORE</span>
             </a>
 
             {/* Audio Toggle */}

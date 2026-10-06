@@ -5,12 +5,14 @@ import { FixtureCard } from '../components/FixtureCard';
 interface FixturesPageProps {
   matches: Match[];
   teams: Team[];
+  activePollMatchIds?: Set<string>;
   onNavigate: (tab: string, param?: string) => void;
 }
 
 export const FixturesPage: React.FC<FixturesPageProps> = ({
   matches,
   teams,
+  activePollMatchIds,
   onNavigate,
 }) => {
   const [selectedRound, setSelectedRound] = useState<number | 'ALL'>('ALL');
@@ -97,6 +99,7 @@ export const FixturesPage: React.FC<FixturesPageProps> = ({
                       match={match}
                       homeTeam={home}
                       awayTeam={away}
+                      hasActivePoll={activePollMatchIds?.has(match.id)}
                       onClick={() => onNavigate('match-detail', match.id)}
                     />
                   );

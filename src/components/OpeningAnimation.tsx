@@ -3,28 +3,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { INITIAL_TEAMS } from '../data/initialData';
 import { TeamBadge } from './TeamBadge';
 import { audioService } from '../services/audioService';
-import { FastForward, Volume2, VolumeX, Shield, ArrowRight } from 'lucide-react';
+import { Volume2, VolumeX, FastForward } from 'lucide-react';
 
 interface OpeningAnimationProps {
-  onComplete: (targetTab?: string) => void;
+  onComplete: () => void;
 }
 
 export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }) => {
-  // Pacing:
-  // Phase 1 (0.0s – 1.8s): Dark Stadium Ambience
-  // Phase 2 (1.8s – 3.8s): HOSTEL LEAGUE Typography Reveal
-  // Phase 3 (3.8s – 5.2s): 26 Reveal + Tournament Specs (6 Clubs • 5 Rounds • 15 Fixtures)
-  // Phase 4 (5.2s – 13.0s): 6 Clubs Spotlight (Full 1.3s of readable screen time for each club)
-  // Phase 5 (13.0s – 15.0s): "THE BATTLE FOR THE CROWN" + Referee Whistle & Ball Kick
-  // Phase 6 (15.0s+): Tournament Overview Transition ("THE TOURNAMENT IS UNDERWAY")
-  const [phase, setPhase] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
-  const [clubIndex, setClubIndex] = useState<number>(0);
+  // Steps:
+  // 1 (0.0s – 1.5s): Dark/neutral background + subtle football-pitch markings
+  // 2 (1.5s – 3.0s): Football rolls/kicks across the screen
+  // 3 (3.0s – 4.5s): Reveal "HOSTEL LEAGUE"
+  // 4 (4.5s – 5.5s): Reveal "26" with restrained impact & sound
+  // 5 (5.5s – 7.0s): Reveal the six clubs/crests
+  // 6 (7.0s – 8.0s): Show "6 CLUBS • 5 ROUNDS • 15 MATCHES" & smooth transition into home
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [isMuted, setIsMuted] = useState<boolean>(audioService.getMuted());
-  const [overviewTimer, setOverviewTimer] = useState<number>(3);
   const completedRef = useRef(false);
 
-  // Exact ordered list of the 6 clubs as specified
-  const INTRO_CLUBS = [
+  // The 6 official clubs in tournament order
+  const OFFICIAL_CLUBS = [
     INITIAL_TEAMS.find(t => t.name === 'Crystal Palace') || INITIAL_TEAMS[0],
     INITIAL_TEAMS.find(t => t.name === 'Spurs') || INITIAL_TEAMS[1],
     INITIAL_TEAMS.find(t => t.name === 'Aston Villa') || INITIAL_TEAMS[2],
@@ -36,63 +34,52 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
   const handleFinish = () => {
     if (completedRef.current) return;
     completedRef.current = true;
-    audioService.playBallKick();
     localStorage.setItem('hl26_seen_intro', 'true');
     onComplete();
   };
 
-  const handleNavigateToOverview = () => {
-    if (completedRef.current) return;
-    completedRef.current = true;
-    audioService.playBroadcastHit();
-    localStorage.setItem('hl26_seen_intro', 'true');
-    onComplete('home');
+  const handleSkip = () => {
+    handleFinish();
   };
 
-  const handleSkipToTransition = () => {
-    if (phase < 6) {
-      setPhase(6);
-      audioService.playBroadcastHit();
-    } else {
-      handleFinish();
-    }
-  };
-
-  // Main Scene Orchestration
   useEffect(() => {
     // 0.0s: Ambient stadium crowd rumble
-    audioService.playStadiumAmbience(18);
+    audioService.playStadiumAmbience(8.0);
 
-    // 1.8s: Phase 2 - HOSTEL LEAGUE
+    // 1.5s: Step 2 - Football rolls / kicks across
     const t2 = setTimeout(() => {
-      setPhase(2);
-      audioService.playBroadcastHit();
-    }, 1800);
-
-    // 3.8s: Phase 3 - 26 & Tournament Specs
-    const t3 = setTimeout(() => {
-      setPhase(3);
-      audioService.playBroadcastHit();
-    }, 3800);
-
-    // 5.2s: Phase 4 - Begin 6-Club Broadcast Spotlight
-    const t4 = setTimeout(() => {
-      setPhase(4);
-      setClubIndex(0);
-      audioService.playClubTransition(380);
-    }, 5200);
-
-    // 13.0s: Phase 5 - Final Battle for the Crown & Referee Whistle
-    const t5 = setTimeout(() => {
-      setPhase(5);
-      audioService.playRefereeWhistle();
-    }, 13000);
-
-    // 15.0s: Ball Kick & Move to Tournament Overview Transition
-    const t6 = setTimeout(() => {
+      setStep(2);
       audioService.playBallKick();
-      setPhase(6);
-    }, 15000);
+    }, 1500);
+
+    // 3.0s: Step 3 - "HOSTEL LEAGUE" typography reveal
+    const t3 = setTimeout(() => {
+      setStep(3);
+      audioService.playBroadcastHit();
+    }, 3000);
+
+    // 4.5s: Step 4 - "26" restrained impact
+    const t4 = setTimeout(() => {
+      setStep(4);
+      audioService.playBroadcastHit();
+    }, 4500);
+
+    // 5.5s: Step 5 - Six clubs reveal
+    const t5 = setTimeout(() => {
+      setStep(5);
+      audioService.playClubTransition(440);
+    }, 5500);
+
+    // 7.0s: Step 6 - Tournament specs: 6 CLUBS • 5 ROUNDS • 15 MATCHES
+    const t6 = setTimeout(() => {
+      setStep(6);
+      audioService.playRefereeWhistle();
+    }, 7000);
+
+    // 8.2s: Seamless transition to application
+    const tEnd = setTimeout(() => {
+      handleFinish();
+    }, 8200);
 
     return () => {
       clearTimeout(t2);
@@ -100,306 +87,192 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
       clearTimeout(t4);
       clearTimeout(t5);
       clearTimeout(t6);
+      clearTimeout(tEnd);
     };
   }, []);
-
-  // Phase 6 Countdown to auto-navigate to Quick Tournament View
-  useEffect(() => {
-    if (phase !== 6) return;
-
-    const interval = setInterval(() => {
-      setOverviewTimer(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          handleNavigateToOverview();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [phase]);
-
-  // Club Step Progression: Each of the 6 clubs gets 1300ms of dedicated screen time
-  useEffect(() => {
-    if (phase !== 4) return;
-
-    const clubInterval = setInterval(() => {
-      setClubIndex(prev => {
-        if (prev < INTRO_CLUBS.length - 1) {
-          const next = prev + 1;
-          audioService.playClubTransition(380 + next * 40);
-          return next;
-        }
-        return prev;
-      });
-    }, 1300);
-
-    return () => clearInterval(clubInterval);
-  }, [phase]);
 
   const toggleSound = (e: React.MouseEvent) => {
     e.stopPropagation();
     const muted = audioService.toggleMute();
     setIsMuted(muted);
     if (!muted) {
-      audioService.playStadiumAmbience(10);
+      audioService.playStadiumAmbience(6.0);
     }
   };
-
-  const currentClub = INTRO_CLUBS[clubIndex] || INTRO_CLUBS[0];
 
   return (
     <AnimatePresence>
       <motion.div
-        key="cinematic-broadcast-intro"
+        key="hl26-tournament-intro"
         initial={{ opacity: 1 }}
-        exit={{ opacity: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }}
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#07090D] text-[#F4F4F0] overflow-hidden select-none"
+        exit={{ opacity: 0, transition: { duration: 0.5, ease: 'easeInOut' } }}
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#090e14] text-slate-100 overflow-hidden select-none"
       >
-        {/* RESTRAINED STADIUM ATMOSPHERE LAYER */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute inset-0 pitch-lines opacity-30" />
-
-          {/* Upper Stadium Lighting */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: phase >= 1 ? 0.25 : 0 }}
-            transition={{ duration: 1.8 }}
-            className="absolute -top-32 left-1/4 w-[500px] h-[300px] bg-stadium-700/20 blur-[100px] rounded-full"
-          />
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: phase >= 1 ? 0.25 : 0 }}
-            transition={{ duration: 1.8, delay: 0.2 }}
-            className="absolute -top-32 right-1/4 w-[500px] h-[300px] bg-pitch-600/10 blur-[100px] rounded-full"
-          />
-
-          {/* Vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_35%,#07090D_95%)]" />
+        {/* Subtle pitch background lines */}
+        <div className="absolute inset-0 pointer-events-none opacity-20 flex items-center justify-center">
+          <svg className="w-full h-full max-w-2xl max-h-[80vh] stroke-white/25" viewBox="0 0 400 300" fill="none">
+            {/* Outer Pitch Border */}
+            <rect x="20" y="20" width="360" height="260" strokeWidth="1.5" />
+            {/* Halfway Line */}
+            <line x1="200" y1="20" x2="200" y2="280" strokeWidth="1.5" />
+            {/* Center Circle & Spot */}
+            <circle cx="200" cy="150" r="45" strokeWidth="1.5" />
+            <circle cx="200" cy="150" r="3" fill="white" />
+            {/* Penalty Boxes */}
+            <rect x="20" y="90" width="60" height="120" strokeWidth="1.5" />
+            <rect x="320" y="90" width="60" height="120" strokeWidth="1.5" />
+          </svg>
         </div>
 
-        {/* TOP BROADCAST HEADER */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: phase >= 2 ? 1 : 0 }}
-          transition={{ duration: 0.4 }}
-          className="absolute top-8 sm:top-12 z-20 flex items-center gap-2 font-mono text-[11px] tracking-widest text-[#9EA4AD] uppercase"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-pitch-500" />
-          <span>OFFICIAL LEAGUE BROADCAST</span>
-        </motion.div>
+        {/* Top Controls: Sound & Skip */}
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20">
+          <button
+            onClick={toggleSound}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white/80 transition-colors backdrop-blur-xs cursor-pointer"
+          >
+            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
+            <span className="hidden sm:inline">{isMuted ? 'Muted' : 'Sound'}</span>
+          </button>
 
-        {/* MAIN STAGE */}
-        <div className="relative z-10 w-full max-w-3xl px-6 flex flex-col items-center justify-center text-center min-h-[380px]">
-          
-          {/* PHASE 2 & 3: HOSTEL LEAGUE 26 & TOURNAMENT STRUCTURE */}
-          {(phase === 2 || phase === 3) && (
+          <button
+            onClick={handleSkip}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold uppercase tracking-wider text-white transition-colors backdrop-blur-xs cursor-pointer"
+          >
+            <span>Skip</span>
+            <FastForward className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Main Stage Presentation */}
+        <div className="relative z-10 w-full max-w-lg px-6 flex flex-col items-center justify-center text-center min-h-[320px]">
+
+          {/* STEP 1 & 2: Football rolling across screen */}
+          {step <= 2 && (
             <motion.div
-              initial={{ opacity: 0, y: 15, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center"
+              initial={{ x: -200, opacity: 0, rotate: 0 }}
+              animate={step === 2 ? { x: 0, opacity: 1, rotate: 720 } : { x: -80, opacity: 0.8, rotate: 180 }}
+              transition={{ duration: 1.3, ease: 'easeOut' }}
+              className="flex flex-col items-center justify-center"
             >
-              <h1 className="text-5xl sm:text-7xl md:text-8xl font-black font-display tracking-tight text-white uppercase leading-none">
-                HOSTEL LEAGUE
-              </h1>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/95 text-slate-900 shadow-2xl flex items-center justify-center text-3xl sm:text-4xl border-2 border-slate-300">
+                ⚽
+              </div>
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6 }}
+                transition={{ delay: 0.4 }}
+                className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mt-4"
+              >
+                OFFICIAL TOURNAMENT
+              </motion.span>
+            </motion.div>
+          )}
 
-              {phase === 3 && (
+          {/* STEP 3 & 4: HOSTEL LEAGUE 26 typography reveal */}
+          {(step === 3 || step === 4) && (
+            <div className="space-y-2">
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="text-xs sm:text-sm font-bold tracking-[0.25em] text-emerald-400 uppercase"
+              >
+                THE OFFICIAL CHAMPIONSHIP
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="text-3xl sm:text-5xl font-black text-white tracking-wider uppercase"
+              >
+                HOSTEL LEAGUE
+              </motion.h1>
+
+              {step >= 4 && (
                 <motion.div
-                  initial={{ scale: 1.6, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-                  className="mt-2 text-7xl sm:text-9xl font-black font-display text-gold-400 leading-none"
+                  initial={{ opacity: 0, scale: 1.4 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  className="inline-block mt-2 px-5 py-1 rounded-lg bg-emerald-600 text-white font-black text-4xl sm:text-6xl tracking-tight shadow-lg"
                 >
                   26
                 </motion.div>
               )}
-
-              {/* TOURNAMENT SPECIFICATIONS (Replaced random horizontal line with actual tournament structure) */}
-              {phase === 3 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.15 }}
-                  className="mt-6 pt-5 border-t border-stadium-800 text-xs sm:text-sm font-mono tracking-widest text-[#9EA4AD] uppercase"
-                >
-                  <span>SIX CLUBS</span>
-                  <span className="mx-2.5 text-pitch-500">•</span>
-                  <span>FIVE ROUNDS</span>
-                  <span className="mx-2.5 text-pitch-500">•</span>
-                  <span>FIFTEEN FIXTURES</span>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-
-          {/* PHASE 4: CLUB SPOTLIGHT (ALL SIX TEAMS SHOWN CLEARLY FOR FULL 1.2s EACH) */}
-          {phase === 4 && (
-            <div className="w-full flex flex-col items-center">
-              <div className="text-[11px] font-mono tracking-widest text-[#9EA4AD] uppercase mb-4 flex items-center gap-2">
-                <Shield className="w-3.5 h-3.5 text-pitch-500" />
-                <span>OFFICIAL CONTENDER {clubIndex + 1} OF 6</span>
-              </div>
-
-              {/* Club Spotlight Card */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentClub.id}
-                  initial={{ opacity: 0, scale: 0.97, y: 8 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 1.01, y: -8 }}
-                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full max-w-md p-8 rounded-card bg-stadium-900 border border-stadium-800 shadow-broadcast relative overflow-hidden"
-                >
-                  {/* Subtle team color backlighting */}
-                  <div
-                    className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
-                    style={{ backgroundColor: currentClub.primary_color }}
-                  />
-
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <TeamBadge team={currentClub} size="xl" glow={true} />
-
-                    <h3 className="text-2xl sm:text-3xl font-black font-display text-white mt-4 uppercase tracking-tight">
-                      {currentClub.name}
-                    </h3>
-
-                    <div className="mt-2.5 px-3 py-1 rounded-badge bg-stadium-950 border border-stadium-800 text-xs font-mono">
-                      <span className="text-[#9EA4AD]">MANAGER: </span>
-                      <strong className="text-white uppercase">{currentClub.manager_name}</strong>
-                    </div>
-                  </div>
-
-                  {/* Club Progress Indicator */}
-                  <div className="w-full bg-stadium-950 h-1 rounded-full mt-6 overflow-hidden">
-                    <div
-                      className="bg-pitch-500 h-full transition-all duration-300"
-                      style={{ width: `${((clubIndex + 1) / 6) * 100}%` }}
-                    />
-                  </div>
-                </motion.div>
-              </AnimatePresence>
             </div>
           )}
 
-          {/* PHASE 5: THE BATTLE FOR THE CROWN */}
-          {phase === 5 && (
+          {/* STEP 5: Six Clubs Reveal */}
+          {step === 5 && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="w-full space-y-4"
+            >
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                OFFICIAL PARTICIPATING CLUBS
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-3 items-center justify-center">
+                {OFFICIAL_CLUBS.map((team, idx) => (
+                  <motion.div
+                    key={team.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.08, duration: 0.3 }}
+                    className="flex flex-col items-center justify-center p-2 rounded-lg bg-white/5 border border-white/10 text-center"
+                  >
+                    <TeamBadge team={team} size="md" />
+                    <span className="font-bold text-[11px] text-white mt-1.5 truncate max-w-[80px]">
+                      {team.name}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* STEP 6: Tournament Specs Reveal & Wrap-Up */}
+          {step === 6 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4 }}
-              className="flex flex-col items-center"
+              className="space-y-4"
             >
-              <span className="text-xs font-mono tracking-widest uppercase text-pitch-500 mb-3">
-                SINGLE ROUND-ROBIN CHAMPIONSHIP
-              </span>
-              <h2 className="text-4xl sm:text-6xl md:text-7xl font-black font-display uppercase tracking-tight text-white max-w-xl leading-tight">
-                THE BATTLE FOR THE CROWN
-              </h2>
-            </motion.div>
-          )}
-
-          {/* PHASE 6: TOURNAMENT OVERVIEW TRANSITION */}
-          {phase === 6 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-col items-center max-w-xl mx-auto px-4"
-            >
-              <div className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-widest text-pitch-500 uppercase mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-pitch-500 animate-pulse" />
-                <span>OFFICIAL BROADCAST TRANSITION</span>
+              <div className="w-12 h-12 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 mx-auto flex items-center justify-center text-xl font-black">
+                ⚽
               </div>
 
-              <h2 className="text-4xl sm:text-6xl font-black font-display uppercase tracking-tight text-white leading-tight">
-                HOSTEL LEAGUE <span className="text-gold-400">26</span>
+              <h2 className="text-xl sm:text-2xl font-black uppercase text-white tracking-wide">
+                HOSTEL LEAGUE 26
               </h2>
 
-              <p className="mt-3 text-lg sm:text-2xl font-display font-extrabold uppercase tracking-wide text-white">
-                THE TOURNAMENT IS UNDERWAY
+              <div className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-white/10 border border-white/20 text-xs sm:text-sm font-bold tracking-widest text-emerald-300 uppercase">
+                6 CLUBS • 5 ROUNDS • 15 MATCHES
+              </div>
+
+              <p className="text-xs text-slate-400 font-medium">
+                Entering Tournament Centre...
               </p>
-
-              <div className="mt-2 text-xs sm:text-sm font-mono tracking-widest text-[#9EA4AD] uppercase flex items-center gap-2">
-                <span>6 CLUBS</span>
-                <span className="text-pitch-500">•</span>
-                <span>5 ROUNDS</span>
-                <span className="text-pitch-500">•</span>
-                <span>15 MATCHES</span>
-              </div>
-
-              {/* Progress bar leading into Quick Tournament Overview */}
-              <div className="w-full max-w-sm mt-8 p-4 rounded-card bg-stadium-900 border border-stadium-800 shadow-broadcast">
-                <div className="flex items-center justify-between text-[11px] font-mono text-[#9EA4AD] uppercase mb-2">
-                  <span className="text-white font-bold">CONNECTING TOURNAMENT OVERVIEW</span>
-                  <span className="text-pitch-400 font-bold">{overviewTimer}s</span>
-                </div>
-                <div className="w-full bg-stadium-950 h-1.5 rounded-full overflow-hidden border border-stadium-850">
-                  <motion.div
-                    initial={{ width: '0%' }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 3, ease: 'linear' }}
-                    className="bg-pitch-500 h-full"
-                  />
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 w-full max-w-sm">
-                <button
-                  onClick={handleNavigateToOverview}
-                  className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-badge bg-pitch-600 hover:bg-pitch-500 text-[#07090D] font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-broadcast"
-                >
-                  <span>Enter Tournament Overview</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-
-                <button
-                  onClick={handleFinish}
-                  className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-badge bg-stadium-900 hover:bg-stadium-850 border border-stadium-800 text-white font-mono font-semibold text-xs uppercase tracking-wider transition-colors"
-                >
-                  <span>Explore Full Broadcast Hub</span>
-                </button>
-              </div>
             </motion.div>
           )}
 
         </div>
 
-        {/* BOTTOM CONTROLS: SOUND & SKIP INTRO */}
-        <div className="absolute bottom-8 left-0 right-0 px-6 sm:px-12 flex items-center justify-between z-30">
-          
-          {/* Sound Toggle */}
-          <button
-            onClick={toggleSound}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-badge bg-stadium-900 border border-stadium-800 text-xs font-mono text-[#9EA4AD] hover:text-white transition-colors"
-          >
-            {isMuted ? (
-              <>
-                <VolumeX className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden sm:inline">SOUND OFF</span>
-              </>
-            ) : (
-              <>
-                <Volume2 className="w-3.5 h-3.5 text-pitch-500" />
-                <span className="hidden sm:inline">SOUND ON</span>
-              </>
-            )}
-          </button>
-
-          {/* Skip Intro */}
-          <button
-            onClick={handleSkipToTransition}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-badge bg-stadium-900 hover:bg-stadium-850 border border-stadium-800 text-xs font-mono font-bold uppercase tracking-wider text-[#F4F4F0] hover:text-white transition-all group"
-          >
-            <span>{phase === 6 ? 'Enter Hub' : 'Skip Intro'}</span>
-            <FastForward className="w-3.5 h-3.5 text-gold-400 group-hover:translate-x-1 transition-transform" />
-          </button>
-
+        {/* Bottom subtle progress indicator */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-1.5">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                i === step ? 'w-6 bg-emerald-500' : i < step ? 'w-2 bg-white/40' : 'w-2 bg-white/10'
+              }`}
+            />
+          ))}
         </div>
+
       </motion.div>
     </AnimatePresence>
   );

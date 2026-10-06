@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { tournamentService } from './services/tournamentService';
-import { Team, Match, Player, Goal, ManOfTheMatch } from './types/tournament';
+import { Team, Match, Player, Goal, ManOfTheMatch, POTMPoll } from './types/tournament';
 import { 
   calculateStandings, 
   getTopScorers, 
@@ -29,19 +29,14 @@ const getInitialNav = (): { tab: string; param?: string } => {
   
   // 1. Check URL hash (e.g. #matches, #teams)
   const hash = window.location.hash.replace('#', '').trim();
-  if (hash) {
+  if (hash && hash !== 'quick-view') {
     const [tab, param] = hash.split('/');
-    if (tab) return { tab, param };
+    if (tab && ['home', 'matches', 'match-detail', 'teams', 'team-detail', 'stats', 'rules', 'admin', 'admin-login'].includes(tab)) {
+      return { tab, param };
+    }
   }
   
-  // 2. Check localStorage saved tab
-  const savedTab = localStorage.getItem('hl26_active_tab');
-  const savedParam = localStorage.getItem('hl26_active_param') || undefined;
-  if (savedTab && savedTab !== 'quick-view') {
-    return { tab: savedTab, param: savedParam };
-  }
-  
-  // 3. Default to home
+  // Always default to 'home' on initial opening
   return { tab: 'home' };
 };
 
@@ -78,17 +73,19 @@ export function App() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [motms, setMotms] = useState<ManOfTheMatch[]>([]);
+  const [activePolls, setActivePolls] = useState<POTMPoll[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Load data function
   const loadData = useCallback(async () => {
     try {
-      const [tData, mData, pData, gData, motmData] = await Promise.all([
+      const [tData, mData, pData, gData, motmData, pollsData] = await Promise.all([
         tournamentService.getTeams(),
         tournamentService.getMatches(),
         tournamentService.getPlayers(),
         tournamentService.getGoals(),
         tournamentService.getManOfTheMatches(),
+        tournamentService.getPolls(),
       ]);
 
       setTeams(tData);
@@ -96,6 +93,7 @@ export function App() {
       setPlayers(pData);
       setGoals(gData);
       setMotms(motmData);
+      setActivePolls(pollsData.filter(p => p.status === 'active'));
     } catch (err) {
       console.error('Error fetching tournament data:', err);
     } finally {
@@ -152,7 +150,10 @@ export function App() {
   const handleIntroComplete = () => {
     setShowIntro(false);
     localStorage.setItem('hl26_seen_intro', 'true');
-    handleNavigate('home');
+    setCurrentTab('home');
+    setActiveParam(undefined);
+    window.location.hash = 'home';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleReplayIntro = () => {
@@ -193,6 +194,12 @@ export function App() {
     localStorage.removeItem('hl26_admin_auth');
     handleNavigate('home');
   };
+
+  // Compute active poll match IDs set
+  const activePollMatchIds = useMemo(
+    () => new Set(activePolls.map(p => p.match_id)),
+    [activePolls]
+  );
 
   // Derived statistics (clean calculations from match records)
   const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
@@ -241,6 +248,7 @@ export function App() {
             standings={standings}
             topScorers={topScorers}
             players={players}
+            activePolls={activePolls}
             onNavigate={handleNavigate}
             onSelectPlayer={handleSelectPlayer}
           />
@@ -253,6 +261,7 @@ export function App() {
           <FixturesPage
             matches={matches}
             teams={teams}
+            activePollMatchIds={activePollMatchIds}
             onNavigate={handleNavigate}
           />
         );
@@ -348,6 +357,7 @@ export function App() {
             standings={standings}
             topScorers={topScorers}
             players={players}
+            activePolls={activePolls}
             onNavigate={handleNavigate}
             onSelectPlayer={handleSelectPlayer}
           />
