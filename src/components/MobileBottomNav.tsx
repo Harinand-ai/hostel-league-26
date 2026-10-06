@@ -4,11 +4,13 @@ import { Home, Calendar, Shield, BarChart3, Radio } from 'lucide-react';
 interface MobileBottomNavProps {
   currentTab: string;
   onNavigate: (tab: string, param?: string) => void;
+  onOpenLiveWindow?: () => void;
 }
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   currentTab,
   onNavigate,
+  onOpenLiveWindow,
 }) => {
   const tabs = [
     { id: 'home', label: 'HOME', icon: Home },
@@ -18,7 +20,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       label: 'LIVE',
       icon: Radio,
       isLiveLink: true,
-      url: 'https://hostelleague.vercel.app/',
     },
     { id: 'teams', label: 'CLUBS', icon: Shield },
     { id: 'stats', label: 'STATS', icon: BarChart3 },
@@ -33,19 +34,17 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
           if (tab.isLiveLink) {
             return (
-              <a
+              <button
                 key={tab.id}
-                href={tab.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex flex-col items-center justify-center py-1 px-1 bg-[#801818] border-2 border-[#120d08] text-white active:scale-95 transition-transform"
-                title="Watch Live Match"
+                onClick={onOpenLiveWindow}
+                className="flex-1 flex flex-col items-center justify-center py-1 px-1 bg-[#801818] border-2 border-[#120d08] text-white active:scale-95 transition-transform cursor-pointer"
+                title="Open Live Match Window"
               >
                 <Icon className="w-4 h-4 animate-pulse text-white" />
                 <span className="text-[9px] font-black mt-0.5 tracking-tight font-display text-white">
                   {tab.label}
                 </span>
-              </a>
+              </button>
             );
           }
 

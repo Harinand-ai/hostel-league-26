@@ -13,6 +13,7 @@ interface HomePageProps {
   players?: Player[];
   activePolls?: POTMPoll[];
   onNavigate: (tab: string, param?: string) => void;
+  onOpenLiveWindow?: () => void;
   onSelectPlayer?: (playerId: string) => void;
 }
 
@@ -24,6 +25,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   players = [],
   activePolls = [],
   onNavigate,
+  onOpenLiveWindow,
   onSelectPlayer,
 }) => {
   const teamsMap = new Map(teams.map(t => [t.id, t]));
@@ -122,15 +124,13 @@ export const HomePage: React.FC<HomePageProps> = ({
             <span className="text-xs text-[#cfbeaa]">
               Real-time match broadcast
             </span>
-            <a
-              href="https://hostelleague.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 mc-btn-red text-[10px] font-black uppercase tracking-wider"
+            <button
+              onClick={onOpenLiveWindow}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 mc-btn-red text-[10px] font-black uppercase tracking-wider cursor-pointer"
             >
               <Radio className="w-3.5 h-3.5 animate-pulse" />
               <span>LIVE SCORE →</span>
-            </a>
+            </button>
           </div>
 
           {/* POTM live match sub-surface if poll active for this live match */}
@@ -167,15 +167,13 @@ export const HomePage: React.FC<HomePageProps> = ({
             )}
           </div>
 
-          <a
-            href="https://hostelleague.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-3 py-1.5 mc-btn text-[10px] font-black uppercase tracking-wide shrink-0"
+          <button
+            onClick={onOpenLiveWindow}
+            className="inline-flex items-center gap-1 px-3 py-1.5 mc-btn text-[10px] font-black uppercase tracking-wide shrink-0 cursor-pointer"
           >
             <span>LIVE SCORE</span>
             <ArrowRight className="w-3 h-3" />
-          </a>
+          </button>
         </div>
       )}
 

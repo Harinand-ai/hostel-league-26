@@ -15,6 +15,7 @@ interface MatchDetailPageProps {
   motms: ManOfTheMatch[];
   players: Player[];
   onNavigate: (tab: string, param?: string) => void;
+  onOpenLiveWindow?: () => void;
   onSelectPlayer?: (playerId: string) => void;
 }
 
@@ -26,6 +27,7 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
   motms,
   players,
   onNavigate,
+  onOpenLiveWindow,
   onSelectPlayer,
 }) => {
   const match = matches.find(m => m.id === matchId);
@@ -184,29 +186,27 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
 
       {/* LIVE MATCH LINK BANNER IF CURRENTLY LIVE */}
       {isLive && (
-        <a
-          href="https://hostelleague.vercel.app/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block p-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 text-white shadow-md hover:shadow-lg transition-all"
+        <button
+          onClick={onOpenLiveWindow}
+          className="w-full block p-3.5 mc-btn-red text-left shadow-md cursor-pointer"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-black/30 border border-white/20 flex items-center justify-center">
                 <Radio className="w-4 h-4 text-white animate-pulse" />
               </div>
               <div>
-                <span className="font-extrabold text-sm uppercase block tracking-wide">
+                <span className="font-black text-xs uppercase block tracking-wider text-white">
                   LIVE SCORE
                 </span>
-                <span className="text-xs text-emerald-100">
-                  Follow live pitch commentary and real-time clock
+                <span className="text-xs text-[#ffaaaa]">
+                  Open in-app match broadcast window
                 </span>
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-white" />
           </div>
-        </a>
+        </button>
       )}
 
       {/* GOALSCORERS LIST (SIMPLE: TEAM + PLAYER) */}

@@ -22,6 +22,7 @@ import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { PlayerProfileModal } from './components/PlayerProfileModal';
+import { LiveMatchModal } from './components/LiveMatchModal';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 const getInitialNav = (): { tab: string; param?: string } => {
@@ -49,6 +50,9 @@ export function App() {
 
   // Player Profile Modal state
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+
+  // In-app Live Match Window modal state
+  const [isLiveWindowOpen, setIsLiveWindowOpen] = useState(false);
 
   // Intro state: Show animation at first when the site is opened
   const [showIntro, setShowIntro] = useState<boolean>(() => {
@@ -272,6 +276,7 @@ export function App() {
             players={players}
             activePolls={activePolls}
             onNavigate={handleNavigate}
+            onOpenLiveWindow={() => setIsLiveWindowOpen(true)}
             onSelectPlayer={handleSelectPlayer}
           />
         );
@@ -336,6 +341,7 @@ export function App() {
             motms={motms}
             players={players}
             onNavigate={handleNavigate}
+            onOpenLiveWindow={() => setIsLiveWindowOpen(true)}
             onSelectPlayer={handleSelectPlayer}
           />
         );
@@ -381,6 +387,7 @@ export function App() {
             players={players}
             activePolls={activePolls}
             onNavigate={handleNavigate}
+            onOpenLiveWindow={() => setIsLiveWindowOpen(true)}
             onSelectPlayer={handleSelectPlayer}
           />
         );
@@ -400,6 +407,7 @@ export function App() {
         currentTab={currentTab}
         onNavigate={handleNavigate}
         onReplayIntro={handleReplayIntro}
+        onOpenLiveWindow={() => setIsLiveWindowOpen(true)}
         isAdminLoggedIn={isAdminLoggedIn}
       />
 
@@ -425,6 +433,7 @@ export function App() {
       <MobileBottomNav
         currentTab={currentTab}
         onNavigate={handleNavigate}
+        onOpenLiveWindow={() => setIsLiveWindowOpen(true)}
       />
 
       {/* Player Profile Modal */}
@@ -443,6 +452,12 @@ export function App() {
           onNavigateToMatch={matchId => handleNavigate('match-detail', matchId)}
         />
       )}
+
+      {/* In-App Live Match Window Modal */}
+      <LiveMatchModal
+        isOpen={isLiveWindowOpen}
+        onClose={() => setIsLiveWindowOpen(false)}
+      />
 
     </div>
   );

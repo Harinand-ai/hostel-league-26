@@ -6,6 +6,7 @@ interface NavbarProps {
   currentTab: string;
   onNavigate: (tab: string, param?: string) => void;
   onReplayIntro?: () => void;
+  onOpenLiveWindow?: () => void;
   isAdminLoggedIn?: boolean;
 }
 
@@ -13,6 +14,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentTab,
   onNavigate,
   onReplayIntro,
+  onOpenLiveWindow,
   isAdminLoggedIn,
 }) => {
   const [isMuted, setIsMuted] = useState<boolean>(audioService.getMuted());
@@ -72,17 +74,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right actions: LIVE Button + Sound */}
           <div className="flex items-center gap-2">
-            {/* Direct LIVE Portal Entry */}
-            <a
-              href="https://hostelleague.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider mc-btn-red"
-              title="Watch Live Match Experience"
+            {/* In-app LIVE Window Entry */}
+            <button
+              onClick={onOpenLiveWindow}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider mc-btn-red cursor-pointer"
+              title="Open Live Match Window"
             >
               <Radio className="w-3.5 h-3.5 animate-pulse text-white" />
               <span>LIVE SCORE</span>
-            </a>
+            </button>
 
             {/* Audio Toggle */}
             <button
