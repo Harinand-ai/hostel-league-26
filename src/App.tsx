@@ -25,6 +25,7 @@ import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { QuickViewPage } from './pages/QuickViewPage';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { PlayerProfileModal } from './components/PlayerProfileModal';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 
@@ -56,6 +57,9 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<string>(initialNav.tab);
   const [activeParam, setActiveParam] = useState<string | undefined>(initialNav.param);
   const [returnTarget, setReturnTarget] = useState<{ tab: string; param?: string }>({ tab: 'home' });
+
+  // Player Profile Modal state
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   // Intro state (persisted in localStorage or controlled via URL)
   const [showIntro, setShowIntro] = useState<boolean>(() => {
@@ -238,6 +242,25 @@ export function App() {
   const cleanSheets = useMemo(() => getCleanSheets(matches, players, teams), [matches, players, teams]);
   const motmLeaderboard = useMemo(() => getMotmLeaderboard(motms, players, teams), [motms, players, teams]);
 
+  // Selected player for profile modal
+  const handleSelectPlayer = useCallback((playerId: string) => {
+    setSelectedPlayerId(playerId);
+  }, []);
+
+  const handleClosePlayerModal = useCallback(() => {
+    setSelectedPlayerId(null);
+  }, []);
+
+  const selectedPlayer = useMemo(
+    () => (selectedPlayerId ? players.find(p => p.id === selectedPlayerId) || null : null),
+    [players, selectedPlayerId]
+  );
+
+  const selectedPlayerTeam = useMemo(
+    () => (selectedPlayer ? teams.find(t => t.id === selectedPlayer.team_id) : undefined),
+    [teams, selectedPlayer]
+  );
+
   // Render current page content
   const renderCurrentPage = () => {
     if (loading) {
@@ -259,7 +282,9 @@ export function App() {
             matches={matches}
             standings={standings}
             topScorers={topScorers}
+            players={players}
             onNavigate={handleNavigate}
+            onSelectPlayer={handleSelectPlayer}
           />
         );
 
@@ -310,6 +335,7 @@ export function App() {
             players={players}
             goals={goals}
             onNavigate={handleNavigate}
+            onSelectPlayer={handleSelectPlayer}
           />
         );
 
@@ -323,7 +349,9 @@ export function App() {
             teams={teams}
             matches={matches}
             standings={standings}
+            players={players}
             onNavigate={handleNavigate}
+            onSelectPlayer={handleSelectPlayer}
           />
         );
 
@@ -338,6 +366,7 @@ export function App() {
             motms={motms}
             players={players}
             onNavigate={handleNavigate}
+            onSelectPlayer={handleSelectPlayer}
           />
         );
 
@@ -462,6 +491,23 @@ export function App() {
         onNavigate={handleNavigate}
       />
 
+      {/* Cinematic Player Profile Modal */}
+      {selectedPlayer && (
+        <PlayerProfileModal
+          player={selectedPlayer}
+          team={selectedPlayerTeam}
+          matches={matches}
+          goals={goals}
+          assists={assists}
+          motms={motms}
+          standings={standings}
+          allPlayers={players}
+          allTeams={teams}
+          onClose={handleClosePlayerModal}
+          onNavigateToTeam={teamId => handleNavigate('team-detail', teamId)}
+          onNavigateToMatch={matchId => handleNavigate('match-detail', matchId)}
+        />
+      )}
 
     </div>
   );

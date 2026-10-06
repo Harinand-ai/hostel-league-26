@@ -1,5 +1,5 @@
 import React from 'react';
-import { Team, Match, TeamStanding, PlayerStatEntry } from '../types/tournament';
+import { Team, Match, TeamStanding, PlayerStatEntry, Player } from '../types/tournament';
 import { BroadcastMatchHero } from '../components/BroadcastMatchHero';
 import { ResultCard } from '../components/ResultCard';
 import { LeagueTable } from '../components/LeagueTable';
@@ -13,7 +13,9 @@ interface HomePageProps {
   matches: Match[];
   standings: TeamStanding[];
   topScorers: PlayerStatEntry[];
+  players?: Player[];
   onNavigate: (tab: string, param?: string) => void;
+  onSelectPlayer?: (playerId: string) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -21,7 +23,9 @@ export const HomePage: React.FC<HomePageProps> = ({
   matches,
   standings,
   topScorers,
+  players = [],
   onNavigate,
+  onSelectPlayer,
 }) => {
   const teamsMap = new Map(teams.map(t => [t.id, t]));
 
@@ -195,6 +199,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           <TopScorers
             scorers={topScorers}
             limit={4}
+            allPlayers={players}
+            onSelectPlayer={onSelectPlayer}
             onViewAll={() => onNavigate('stats')}
           />
         </div>

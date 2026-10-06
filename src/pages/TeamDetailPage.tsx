@@ -1,10 +1,11 @@
 import React from 'react';
 import { Team, Match, TeamStanding, Player, Goal } from '../types/tournament';
 import { TeamBadge } from '../components/TeamBadge';
+import { PlayerAvatar } from '../components/PlayerAvatar';
 import { FixtureCard } from '../components/FixtureCard';
 import { ResultCard } from '../components/ResultCard';
 import { EmptyState } from '../components/EmptyState';
-import { ArrowLeft, Shield, Flame, Users, Calendar, Trophy } from 'lucide-react';
+import { ArrowLeft, Shield, Flame, Users, Calendar, Trophy, ChevronRight } from 'lucide-react';
 
 interface TeamDetailPageProps {
   teamId: string;
@@ -14,6 +15,7 @@ interface TeamDetailPageProps {
   players: Player[];
   goals: Goal[];
   onNavigate: (tab: string, param?: string) => void;
+  onSelectPlayer?: (playerId: string) => void;
 }
 
 export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
@@ -24,6 +26,7 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
   players,
   goals,
   onNavigate,
+  onSelectPlayer,
 }) => {
   const team = teams.find(t => t.id === teamId);
   const standing = standings.find(s => s.team.id === teamId);
@@ -205,25 +208,19 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
               {teamPlayers.map(player => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-[#090d16] border border-stadium-750 hover:border-stadium-700 transition-colors"
+                  onClick={() => onSelectPlayer?.(player.id)}
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-[#090d16] border border-stadium-750 hover:border-gold-500/40 hover:bg-stadium-900/60 transition-all cursor-pointer group shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`w-8 h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center border ${
-                      player.position === 'GK'
-                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                        : player.position === 'CB'
-                        ? 'bg-sky-500/15 text-sky-300 border-sky-500/30'
-                        : player.position === 'CF'
-                        ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                        : player.position === 'MID'
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                        : 'bg-stadium-850 text-slate-300 border-stadium-700'
-                    }`}>
-                      {player.position}
-                    </span>
+                    <PlayerAvatar
+                      player={player}
+                      team={team}
+                      size="sm"
+                      showCaptainBadge={false}
+                    />
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-display font-black text-sm text-white block uppercase tracking-tight">
+                        <span className="font-display font-black text-sm text-white block uppercase tracking-tight group-hover:text-gold-400 transition-colors">
                           {player.name}
                         </span>
                         {player.is_captain && (
@@ -237,6 +234,10 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
                       </span>
                     </div>
                   </div>
+
+                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 group-hover:text-gold-400 transition-colors flex items-center gap-1">
+                    Profile <ChevronRight className="w-3 h-3" />
+                  </span>
                 </div>
               ))}
             </div>
@@ -253,11 +254,19 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
           </div>
 
           {topScorerPlayer ? (
-            <div className="p-6 rounded-2xl bg-[#090d16] border border-stadium-750 text-center flex flex-col items-center shadow-broadcast">
-              <div className="w-14 h-14 rounded-2xl bg-gold-500/20 border border-gold-500/40 flex items-center justify-center text-gold-400 mb-3 shadow-inner">
-                <Flame className="w-7 h-7" />
+            <div 
+              onClick={() => onSelectPlayer?.((topScorerPlayer as any).player.id)}
+              className="p-6 rounded-2xl bg-[#090d16] border border-stadium-750 hover:border-gold-500/40 hover:bg-stadium-900/60 transition-all cursor-pointer group text-center flex flex-col items-center shadow-broadcast"
+            >
+              <div className="mb-3">
+                <PlayerAvatar
+                  player={(topScorerPlayer as any).player}
+                  team={team}
+                  size="xl"
+                  glow={true}
+                />
               </div>
-              <h4 className="font-display font-black text-xl text-white uppercase">
+              <h4 className="font-display font-black text-xl text-white uppercase group-hover:text-gold-400 transition-colors">
                 {(topScorerPlayer as any).player.name}
               </h4>
               <p className="text-xs text-slate-400 font-mono mt-0.5">
@@ -267,6 +276,9 @@ export const TeamDetailPage: React.FC<TeamDetailPageProps> = ({
                 <span className="text-3xl font-black text-gold-400">{(topScorerPlayer as any).count}</span>
                 <span className="text-xs uppercase text-slate-400 font-bold">Tournament Goals</span>
               </div>
+              <span className="mt-3 text-[10px] font-mono font-bold uppercase text-slate-400 group-hover:text-gold-400 transition-colors flex items-center gap-1">
+                View Full Profile <ChevronRight className="w-3 h-3" />
+              </span>
             </div>
           ) : (
             <EmptyState

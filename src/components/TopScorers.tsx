@@ -1,21 +1,27 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { PlayerStatEntry } from '../types/tournament';
+import { PlayerStatEntry, Player } from '../types/tournament';
 import { TeamBadge } from './TeamBadge';
-import { Flame } from 'lucide-react';
+import { PlayerAvatar } from './PlayerAvatar';
+import { Flame, ChevronRight } from 'lucide-react';
 import { EmptyState } from './EmptyState';
 
 interface TopScorersProps {
   scorers: PlayerStatEntry[];
   limit?: number;
+  allPlayers?: Player[];
+  onSelectPlayer?: (playerId: string) => void;
   onViewAll?: () => void;
 }
 
 export const TopScorers: React.FC<TopScorersProps> = ({
   scorers,
   limit = 5,
+  allPlayers = [],
+  onSelectPlayer,
   onViewAll,
 }) => {
+  const playersMap = React.useMemo(() => new Map(allPlayers.map(p => [p.id, p])), [allPlayers]);
   const displayScorers = limit ? scorers.slice(0, limit) : scorers;
 
   if (displayScorers.length === 0) {
@@ -41,9 +47,10 @@ export const TopScorers: React.FC<TopScorersProps> = ({
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={`flex items-center justify-between p-4 transition-colors ${
+              onClick={() => onSelectPlayer?.(entry.player_id)}
+              className={`flex items-center justify-between p-4 transition-all ${
                 isGoldenBoot ? 'bg-gold-500/[0.05]' : 'hover:bg-stadium-850/60'
-              }`}
+              } ${onSelectPlayer ? 'cursor-pointer group' : ''}`}
             >
               {/* Rank & Player info */}
               <div className="flex items-center gap-3.5">
@@ -57,10 +64,18 @@ export const TopScorers: React.FC<TopScorersProps> = ({
                   {rank}
                 </span>
 
-                <TeamBadge team={entry.team} size="sm" />
+                {playersMap.get(entry.player_id) ? (
+                  <PlayerAvatar
+                    player={playersMap.get(entry.player_id)!}
+                    team={entry.team}
+                    size="sm"
+                  />
+                ) : (
+                  <TeamBadge team={entry.team} size="sm" />
+                )}
 
                 <div>
-                  <h4 className="font-display font-black text-sm text-white tracking-tight uppercase">
+                  <h4 className="font-display font-black text-sm text-white tracking-tight uppercase group-hover:text-gold-400 transition-colors">
                     {entry.player_name}
                   </h4>
                   <p className="text-[11px] text-slate-400 font-mono">
@@ -70,13 +85,18 @@ export const TopScorers: React.FC<TopScorersProps> = ({
               </div>
 
               {/* Goals counter */}
-              <div className="text-right font-mono">
-                <span className="font-display font-black text-xl sm:text-2xl text-gold-400">
-                  {entry.value}
-                </span>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block -mt-1">
-                  {entry.value === 1 ? 'GOAL' : 'GOALS'}
-                </span>
+              <div className="flex items-center gap-3">
+                <div className="text-right font-mono">
+                  <span className="font-display font-black text-xl sm:text-2xl text-gold-400">
+                    {entry.value}
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block -mt-1">
+                    {entry.value === 1 ? 'GOAL' : 'GOALS'}
+                  </span>
+                </div>
+                {onSelectPlayer && (
+                  <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-gold-400 transition-colors" />
+                )}
               </div>
             </motion.div>
           );

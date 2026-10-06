@@ -18,6 +18,7 @@ import {
 } from '../types/tournament';
 import { tournamentService } from '../services/tournamentService';
 import { TeamBadge } from '../components/TeamBadge';
+import { PlayerAvatar } from '../components/PlayerAvatar';
 import { 
   Shield, 
   Calendar, 
@@ -99,6 +100,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [playerTeamId, setPlayerTeamId] = useState(teams[0]?.id || '');
   const [playerPosition, setPlayerPosition] = useState<Position>('MID');
   const [playerIsCaptain, setPlayerIsCaptain] = useState<boolean>(false);
+  const [playerPhotoUrl, setPlayerPhotoUrl] = useState<string>('');
   const [playerFilterTeam, setPlayerFilterTeam] = useState<string>('all');
 
   // Manager Edit State
@@ -290,6 +292,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setPlayerTeamId(teams[0]?.id || '');
     setPlayerPosition('MID');
     setPlayerIsCaptain(false);
+    setPlayerPhotoUrl('');
     setPlayerModalOpen(true);
   };
 
@@ -299,6 +302,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setPlayerTeamId(p.team_id);
     setPlayerPosition(p.position);
     setPlayerIsCaptain(Boolean(p.is_captain));
+    setPlayerPhotoUrl(p.photo_url || '');
     setPlayerModalOpen(true);
   };
 
@@ -324,6 +328,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           team_id: playerTeamId,
           position: playerPosition,
           is_captain: playerIsCaptain,
+          photo_url: playerPhotoUrl.trim() || undefined,
         });
         showToast(`Player ${playerName} updated.`);
       } else {
@@ -332,6 +337,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           team_id: playerTeamId,
           position: playerPosition,
           is_captain: playerIsCaptain,
+          photo_url: playerPhotoUrl.trim() || undefined,
         });
         showToast(`Player ${playerName} registered.`);
       }
@@ -1342,22 +1348,23 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   className="flex items-center justify-between p-3.5 rounded-2xl bg-[#090d16] border border-stadium-750 hover:border-stadium-700 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`w-8 h-8 rounded-lg font-bold font-mono text-[11px] flex items-center justify-center border ${
-                      p.position === 'GK'
-                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                        : p.position === 'CB'
-                        ? 'bg-sky-500/15 text-sky-300 border-sky-500/30'
-                        : p.position === 'CF'
-                        ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                        : p.position === 'MID'
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                        : 'bg-stadium-850 text-slate-300 border-stadium-700'
-                    }`}>
-                      {p.position}
-                    </span>
+                    <PlayerAvatar
+                      player={p}
+                      team={team}
+                      size="sm"
+                    />
                     <div>
                       <div className="flex items-center gap-1.5">
                         <h4 className="font-bold text-xs text-white uppercase">{p.name}</h4>
+                        <span className={`px-1 py-0.2 rounded text-[8px] font-mono font-bold uppercase border ${
+                          p.position === 'GK' ? 'text-amber-300 border-amber-500/30' :
+                          p.position === 'CB' ? 'text-sky-300 border-sky-500/30' :
+                          p.position === 'CF' ? 'text-rose-300 border-rose-500/30' :
+                          p.position === 'MID' ? 'text-emerald-300 border-emerald-500/30' :
+                          'text-slate-400 border-stadium-700'
+                        }`}>
+                          {p.position}
+                        </span>
                         {p.is_captain && (
                           <span className="px-1 py-0.2 rounded text-[8px] font-mono font-black uppercase bg-gold-400 text-stadium-980">
                             CAPTAIN
@@ -1454,6 +1461,31 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <option value="CF">CF - Center Forward</option>
                       <option value="TBD">TBD - To Be Determined</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1 font-sans">
+                      Player Photograph (Path or URL)
+                    </label>
+                    <input
+                      type="text"
+                      value={playerPhotoUrl}
+                      onChange={e => setPlayerPhotoUrl(e.target.value)}
+                      placeholder="e.g. /photos/Adithyan Tp.jpg or https://...supabase.co/..."
+                      className="w-full bg-stadium-950 border border-stadium-750 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-gold-500 font-sans text-xs"
+                    />
+                    <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400 font-mono">
+                      <span>Development: /photos/... • Production: Supabase Storage</span>
+                      {playerPhotoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setPlayerPhotoUrl('')}
+                          className="text-rose-400 hover:text-rose-300 underline cursor-pointer"
+                        >
+                          Remove Photo
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 pt-2">

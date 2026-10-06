@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlayerStatEntry, Team, Match, TeamStanding } from '../types/tournament';
+import { PlayerStatEntry, Team, Match, TeamStanding, Player } from '../types/tournament';
 import { StatCard } from '../components/StatCard';
 import { TeamBadge } from '../components/TeamBadge';
 import { Flame, Compass, ShieldCheck, Award, BarChart3, Trophy } from 'lucide-react';
@@ -12,7 +12,9 @@ interface StatsPageProps {
   teams: Team[];
   matches: Match[];
   standings: TeamStanding[];
+  players?: Player[];
   onNavigate: (tab: string, param?: string) => void;
+  onSelectPlayer?: (playerId: string) => void;
 }
 
 export const StatsPage: React.FC<StatsPageProps> = ({
@@ -21,7 +23,9 @@ export const StatsPage: React.FC<StatsPageProps> = ({
   cleanSheets,
   motmLeaderboard,
   standings,
+  players = [],
   onNavigate,
+  onSelectPlayer,
 }) => {
   const [activeTab, setActiveTab] = useState<'all' | 'scorers' | 'assists' | 'motm' | 'cleansheets' | 'teams'>('all');
 
@@ -93,6 +97,8 @@ export const StatsPage: React.FC<StatsPageProps> = ({
             valueLabel="Goals"
             emptyTitle="NO GOALSCORER DATA YET"
             emptyDescription="Goalscorer statistics will appear after matches are completed."
+            allPlayers={players}
+            onSelectPlayer={onSelectPlayer}
           />
         )}
 
@@ -106,6 +112,8 @@ export const StatsPage: React.FC<StatsPageProps> = ({
             valueLabel="Assists"
             emptyTitle="NO ASSISTS DATA YET"
             emptyDescription="Assist statistics will appear after matches are recorded."
+            allPlayers={players}
+            onSelectPlayer={onSelectPlayer}
           />
         )}
 
@@ -119,6 +127,8 @@ export const StatsPage: React.FC<StatsPageProps> = ({
             valueLabel="Awards"
             emptyTitle="NO MOTM AWARDS YET"
             emptyDescription="Man of the match awards are chosen following each match."
+            allPlayers={players}
+            onSelectPlayer={onSelectPlayer}
           />
         )}
 
@@ -132,6 +142,8 @@ export const StatsPage: React.FC<StatsPageProps> = ({
             valueLabel="Clean Sheets"
             emptyTitle="NO CLEAN SHEETS YET"
             emptyDescription="Clean sheets will be awarded to keepers with 0 goals conceded."
+            allPlayers={players}
+            onSelectPlayer={onSelectPlayer}
           />
         )}
 

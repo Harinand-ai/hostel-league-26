@@ -48,6 +48,25 @@ class TournamentService {
     const storedPlayers = localStorage.getItem(STORAGE_KEYS.PLAYERS);
     if (!storedPlayers || JSON.parse(storedPlayers).length === 0) {
       localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(INITIAL_PLAYERS));
+    } else {
+      try {
+        const parsed: Player[] = JSON.parse(storedPlayers);
+        let hasChanges = false;
+        const initialMap = new Map(INITIAL_PLAYERS.map(p => [p.id, p]));
+        const updated = parsed.map(p => {
+          const init = initialMap.get(p.id);
+          if (init?.photo_url && !p.photo_url) {
+            hasChanges = true;
+            return { ...p, photo_url: init.photo_url };
+          }
+          return p;
+        });
+        if (hasChanges) {
+          localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(updated));
+        }
+      } catch (err) {
+        console.warn('Error synchronizing stored player photos:', err);
+      }
     }
     if (!localStorage.getItem(STORAGE_KEYS.GOALS)) {
       localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify([]));

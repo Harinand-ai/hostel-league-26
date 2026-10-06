@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Match, Team, Goal, Assist, ManOfTheMatch, Player } from '../types/tournament';
 import { TeamBadge } from '../components/TeamBadge';
-import { Calendar, Clock, MapPin, Award, ArrowLeft, Shield } from 'lucide-react';
+import { PlayerAvatar } from '../components/PlayerAvatar';
+import { Calendar, Clock, MapPin, Award, ArrowLeft, Shield, ChevronRight } from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
 import { POTMPollCard } from '../components/POTMPollCard';
 
@@ -15,6 +16,7 @@ interface MatchDetailPageProps {
   motms: ManOfTheMatch[];
   players: Player[];
   onNavigate: (tab: string, param?: string) => void;
+  onSelectPlayer?: (playerId: string) => void;
 }
 
 export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
@@ -26,6 +28,7 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
   motms,
   players,
   onNavigate,
+  onSelectPlayer,
 }) => {
   const match = matches.find(m => m.id === matchId);
   const teamsMap = new Map(teams.map(t => [t.id, t]));
@@ -205,23 +208,39 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-950/40 via-stadium-900 to-amber-950/40 border border-gold-500/40 flex items-center justify-between shadow-gold-glow"
+          onClick={() => onSelectPlayer?.(motmPlayer.id)}
+          className={`p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-950/40 via-stadium-900 to-amber-950/40 border border-gold-500/40 flex items-center justify-between shadow-gold-glow ${
+            onSelectPlayer ? 'cursor-pointer hover:border-gold-400 transition-all group' : ''
+          }`}
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gold-500/20 border border-gold-500/50 flex items-center justify-center text-gold-400 shadow-inner">
-              <Award className="w-6 h-6" />
-            </div>
+            <PlayerAvatar
+              player={motmPlayer}
+              team={teamsMap.get(motmPlayer.team_id)}
+              size="lg"
+              glow={true}
+            />
             <div>
               <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-gold-400 block">
                 OFFICIAL MAN OF THE MATCH
               </span>
-              <h3 className="font-display font-black text-xl text-white">
+              <h3 className="font-display font-black text-xl text-white group-hover:text-gold-400 transition-colors">
                 {motmPlayer.name}
               </h3>
+              <span className="text-xs text-slate-400 font-mono">
+                {teamsMap.get(motmPlayer.team_id)?.name} • {motmPlayer.position}
+              </span>
             </div>
           </div>
-          <div className="text-right">
-            <span className="text-xs text-slate-400 font-mono uppercase font-bold">MVP ACCOLADE</span>
+          <div className="text-right flex items-center gap-2">
+            <div>
+              <span className="text-xs text-slate-400 font-mono uppercase font-bold block">MVP ACCOLADE</span>
+              {onSelectPlayer && (
+                <span className="text-[10px] text-gold-400 uppercase font-mono font-bold">
+                  View Profile →
+                </span>
+              )}
+            </div>
           </div>
         </motion.div>
       )}
@@ -258,7 +277,10 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.3, delay: idx * 0.1 }}
-                      className="relative flex items-center justify-between p-3 rounded-xl bg-stadium-950/80 border border-stadium-800 text-xs"
+                      onClick={() => onSelectPlayer?.(goal.player_id)}
+                      className={`relative flex items-center justify-between p-3 rounded-xl bg-stadium-950/80 border border-stadium-800 text-xs transition-all ${
+                        onSelectPlayer ? 'cursor-pointer hover:border-gold-500/40 hover:bg-stadium-900 group' : ''
+                      }`}
                     >
                       {/* Timeline node */}
                       <span className="absolute -left-[27px] w-3 h-3 rounded-full bg-emerald-400 border-2 border-stadium-950 shadow-sm" />
@@ -267,7 +289,14 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
                         <span className="font-mono font-black text-emerald-400 w-9 text-xs">
                           {goal.minute}'
                         </span>
-                        <span className="font-bold text-slate-100 text-sm">
+                        {player && (
+                          <PlayerAvatar
+                            player={player}
+                            team={team}
+                            size="xs"
+                          />
+                        )}
+                        <span className="font-bold text-slate-100 text-sm group-hover:text-gold-400 transition-colors">
                           {player?.name || 'Goal'}
                         </span>
                       </div>
@@ -301,10 +330,20 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.3, delay: idx * 0.1 }}
-                      className="flex items-center justify-between p-3 rounded-xl bg-stadium-950/80 border border-stadium-800 text-xs"
+                      onClick={() => onSelectPlayer?.(assist.player_id)}
+                      className={`flex items-center justify-between p-3 rounded-xl bg-stadium-950/80 border border-stadium-800 text-xs transition-all ${
+                        onSelectPlayer ? 'cursor-pointer hover:border-gold-500/40 hover:bg-stadium-900 group' : ''
+                      }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-100 text-sm">
+                      <div className="flex items-center gap-2.5">
+                        {player && (
+                          <PlayerAvatar
+                            player={player}
+                            team={team}
+                            size="xs"
+                          />
+                        )}
+                        <span className="font-bold text-slate-100 text-sm group-hover:text-gold-400 transition-colors">
                           {player?.name || 'Player'}
                         </span>
                         {assist.minute && (
@@ -322,7 +361,6 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
               </div>
             )}
           </div>
-
         </div>
       )}
 

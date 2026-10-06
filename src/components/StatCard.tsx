@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { PlayerStatEntry } from '../types/tournament';
+import { PlayerStatEntry, Player } from '../types/tournament';
 import { TeamBadge } from './TeamBadge';
-import { LucideIcon } from 'lucide-react';
+import { PlayerAvatar } from './PlayerAvatar';
+import { LucideIcon, ChevronRight } from 'lucide-react';
 import { EmptyState } from './EmptyState';
 
 interface StatCardProps {
@@ -13,6 +14,8 @@ interface StatCardProps {
   valueLabel: string;
   emptyTitle?: string;
   emptyDescription?: string;
+  allPlayers?: Player[];
+  onSelectPlayer?: (playerId: string) => void;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -23,7 +26,10 @@ export const StatCard: React.FC<StatCardProps> = ({
   valueLabel,
   emptyTitle = 'NO DATA YET',
   emptyDescription = 'Statistics will appear once tournament matches are completed.',
+  allPlayers = [],
+  onSelectPlayer,
 }) => {
+  const playersMap = React.useMemo(() => new Map(allPlayers.map(p => [p.id, p])), [allPlayers]);
   return (
     <div className="rounded-2xl bg-[#090d16] border border-stadium-750 overflow-hidden shadow-broadcast flex flex-col">
       {/* Header */}
@@ -63,9 +69,10 @@ export const StatCard: React.FC<StatCardProps> = ({
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: index * 0.04 }}
-                  className={`flex items-center justify-between p-3.5 rounded-xl transition-colors ${
+                  className={`flex items-center justify-between p-3.5 rounded-xl transition-all ${
                     isLeader ? 'bg-gold-500/[0.04]' : 'hover:bg-stadium-850/60'
-                  }`}
+                  } ${onSelectPlayer ? 'cursor-pointer group' : ''}`}
+                  onClick={() => onSelectPlayer?.(entry.player_id)}
                 >
                   <div className="flex items-center gap-3.5">
                     <span
@@ -78,10 +85,18 @@ export const StatCard: React.FC<StatCardProps> = ({
                       {rank}
                     </span>
 
-                    <TeamBadge team={entry.team} size="sm" />
+                    {playersMap.get(entry.player_id) ? (
+                      <PlayerAvatar
+                        player={playersMap.get(entry.player_id)!}
+                        team={entry.team}
+                        size="sm"
+                      />
+                    ) : (
+                      <TeamBadge team={entry.team} size="sm" />
+                    )}
 
                     <div>
-                      <span className="font-display font-black text-sm text-white block uppercase tracking-tight">
+                      <span className="font-display font-black text-sm text-white block uppercase tracking-tight group-hover:text-gold-400 transition-colors">
                         {entry.player_name}
                       </span>
                       <span className="text-[11px] text-slate-400 font-mono">
@@ -90,13 +105,18 @@ export const StatCard: React.FC<StatCardProps> = ({
                     </div>
                   </div>
 
-                  <div className="text-right font-mono">
-                    <span className="font-display font-black text-lg sm:text-xl text-gold-400">
-                      {entry.value}
-                    </span>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block -mt-1">
-                      {valueLabel}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right font-mono">
+                      <span className="font-display font-black text-lg sm:text-xl text-gold-400">
+                        {entry.value}
+                      </span>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block -mt-1">
+                        {valueLabel}
+                      </span>
+                    </div>
+                    {onSelectPlayer && (
+                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-gold-400 transition-colors" />
+                    )}
                   </div>
                 </motion.div>
               );
