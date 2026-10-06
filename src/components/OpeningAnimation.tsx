@@ -34,7 +34,9 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
   const handleFinish = () => {
     if (completedRef.current) return;
     completedRef.current = true;
-    localStorage.setItem('hl26_seen_intro', 'true');
+    try {
+      sessionStorage.setItem('hl26_intro_played_session', 'true');
+    } catch {}
     onComplete();
   };
 

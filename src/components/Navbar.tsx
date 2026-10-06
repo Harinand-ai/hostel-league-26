@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, Radio, Trophy } from 'lucide-react';
+import { Volume2, VolumeX, Radio, Trophy, Play } from 'lucide-react';
 import { audioService } from '../services/audioService';
 
 interface NavbarProps {
@@ -12,6 +12,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   currentTab,
   onNavigate,
+  onReplayIntro,
   isAdminLoggedIn,
 }) => {
   const [isMuted, setIsMuted] = useState<boolean>(audioService.getMuted());
@@ -97,6 +98,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Volume2 className="w-4 h-4 text-green-700" />
               )}
             </button>
+
+            {/* Replay Intro Button */}
+            {onReplayIntro && (
+              <button
+                onClick={onReplayIntro}
+                title="Watch tournament intro animation"
+                className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+              >
+                <Play className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                <span>Intro</span>
+              </button>
+            )}
 
             {/* Admin shortcut badge if logged in */}
             {isAdminLoggedIn && (

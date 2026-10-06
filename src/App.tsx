@@ -50,15 +50,32 @@ export function App() {
   // Player Profile Modal state
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
-  // Intro state (persisted in localStorage or controlled via URL)
+  // Intro state: Show animation at first when the site is opened
   const [showIntro, setShowIntro] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
+    try {
+      localStorage.removeItem('hl26_seen_intro');
+    } catch {}
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('intro') === 'true') return true;
-    if (urlParams.get('view') === 'full' || window.location.hash.length > 1) {
+    if (urlParams.get('nointro') === 'true' || urlParams.get('skipIntro') === 'true' || urlParams.get('view') === 'full') {
       return false;
     }
-    return !localStorage.getItem('hl26_seen_intro');
+    
+    // Don't show intro if directly opening admin
+    const hash = window.location.hash.replace('#', '').trim();
+    if (hash === 'admin' || hash === 'admin-login') {
+      return false;
+    }
+    
+    // Check if dismissed in this specific browsing session
+    const seenInSession = sessionStorage.getItem('hl26_intro_played_session');
+    if (seenInSession === 'true') {
+      return false;
+    }
+    
+    // Always show intro at first!
+    return true;
   });
 
   // Admin login session state
@@ -149,7 +166,9 @@ export function App() {
 
   const handleIntroComplete = () => {
     setShowIntro(false);
-    localStorage.setItem('hl26_seen_intro', 'true');
+    try {
+      sessionStorage.setItem('hl26_intro_played_session', 'true');
+    } catch {}
     setCurrentTab('home');
     setActiveParam(undefined);
     window.location.hash = 'home';
@@ -157,6 +176,9 @@ export function App() {
   };
 
   const handleReplayIntro = () => {
+    try {
+      sessionStorage.removeItem('hl26_intro_played_session');
+    } catch {}
     setShowIntro(true);
   };
 
