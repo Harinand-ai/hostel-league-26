@@ -1,19 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { audioService } from '../services/audioService';
-import { Volume2, VolumeX, FastForward } from 'lucide-react';
+import { INITIAL_TEAMS } from '../data/initialData';
+import { TeamBadge } from './TeamBadge';
+import { FastForward } from 'lucide-react';
 
 interface OpeningAnimationProps {
   onComplete: () => void;
 }
 
 export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }) => {
-  // Phase 1 (0.0s – 2.2s): Vertical football pitch with football in the center (NO text/writing)
-  // Phase 2 (2.2s – 4.8s): Clean reveal of "HOSTEL LEAGUE 26"
-  // 5.0s: Smooth transition into home
-  const [phase, setPhase] = useState<'ball' | 'title'>('ball');
-  const [isMuted, setIsMuted] = useState<boolean>(audioService.getMuted());
+  // Phase 1 (0.0s – 1.4s): Football in the center of vertical pitch (no writing)
+  // Phase 2 (1.4s – 2.8s): HOSTEL LEAGUE 26
+  // Phase 3 (2.8s – 4.8s): All 6 teams displayed vertically
+  // 5.0s: Transition into the home page
+  const [phase, setPhase] = useState<'ball' | 'title' | 'teams'>('ball');
   const completedRef = useRef(false);
+
+  // The 6 official tournament clubs in order
+  const OFFICIAL_CLUBS = [
+    INITIAL_TEAMS.find(t => t.name === 'Crystal Palace') || INITIAL_TEAMS[0],
+    INITIAL_TEAMS.find(t => t.name === 'Spurs') || INITIAL_TEAMS[1],
+    INITIAL_TEAMS.find(t => t.name === 'Aston Villa') || INITIAL_TEAMS[2],
+    INITIAL_TEAMS.find(t => t.name === 'Brighton') || INITIAL_TEAMS[3],
+    INITIAL_TEAMS.find(t => t.name === 'Fulham') || INITIAL_TEAMS[4],
+    INITIAL_TEAMS.find(t => t.name === 'Nottingham Forest') || INITIAL_TEAMS[5],
+  ];
 
   const handleFinish = () => {
     if (completedRef.current) return;
@@ -25,40 +36,27 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
   };
 
   useEffect(() => {
-    // 0.0s: Stadium ambient sound
-    audioService.playStadiumAmbience(5.5);
-
-    // 0.6s: Football kick impact in the center
-    const tKick = setTimeout(() => {
-      audioService.playBallKick();
-    }, 600);
-
-    // 2.2s: Reveal "HOSTEL LEAGUE 26"
+    // 1.4s: Reveal "HOSTEL LEAGUE 26"
     const tTitle = setTimeout(() => {
       setPhase('title');
-      audioService.playBroadcastHit();
-    }, 2200);
+    }, 1400);
 
-    // 4.8s: Transition to home
+    // 2.8s: Show all 6 clubs vertically
+    const tTeams = setTimeout(() => {
+      setPhase('teams');
+    }, 2800);
+
+    // 4.8s: Seamless transition into home page
     const tEnd = setTimeout(() => {
       handleFinish();
     }, 4800);
 
     return () => {
-      clearTimeout(tKick);
       clearTimeout(tTitle);
+      clearTimeout(tTeams);
       clearTimeout(tEnd);
     };
   }, []);
-
-  const toggleSound = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const muted = audioService.toggleMute();
-    setIsMuted(muted);
-    if (!muted) {
-      audioService.playStadiumAmbience(5.0);
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -75,7 +73,7 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
             viewBox="0 0 300 500"
             fill="none"
           >
-            {/* Outer Pitch Touchlines & Goal Lines */}
+            {/* Outer Pitch Border */}
             <rect x="20" y="20" width="260" height="460" rx="4" strokeWidth="1.5" />
 
             {/* Halfway Line */}
@@ -103,16 +101,8 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
           </svg>
         </div>
 
-        {/* Top Controls: Sound & Skip */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20 max-w-sm mx-auto">
-          <button
-            onClick={toggleSound}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white/80 transition-colors backdrop-blur-xs cursor-pointer"
-          >
-            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
-            <span>{isMuted ? 'Muted' : 'Sound'}</span>
-          </button>
-
+        {/* Top Controls: Skip */}
+        <div className="absolute top-4 right-4 z-20">
           <button
             onClick={handleFinish}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold uppercase tracking-wider text-white transition-colors backdrop-blur-xs cursor-pointer"
@@ -122,54 +112,75 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
           </button>
         </div>
 
-        {/* CENTER CONTENT */}
+        {/* CENTER CONTENT CONTAINER */}
         <div className="relative z-10 w-full max-w-xs px-4 flex flex-col items-center justify-center text-center">
           <AnimatePresence mode="wait">
-            {phase === 'ball' ? (
-              /* PHASE 1: ONLY THE FOOTBALL IN BETWEEN (NO WRITING) */
+            {phase === 'ball' && (
+              /* 1. ONLY FOOTBALL IN THE CENTER (NO WRITING) */
               <motion.div
-                key="vertical-football"
+                key="vertical-ball-phase"
                 initial={{ scale: 0.3, opacity: 0, rotate: -180 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0.8, opacity: 0, transition: { duration: 0.3 } }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="flex items-center justify-center"
+                exit={{ scale: 0.8, opacity: 0, transition: { duration: 0.25 } }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-center justify-center select-none"
               >
-                <motion.div
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/95 text-slate-900 shadow-2xl flex items-center justify-center text-4xl sm:text-5xl border-2 border-slate-300 select-none"
-                >
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/95 text-slate-900 shadow-2xl flex items-center justify-center text-4xl sm:text-5xl border-2 border-slate-300">
                   ⚽
-                </motion.div>
+                </div>
               </motion.div>
-            ) : (
-              /* PHASE 2: ONLY HOSTEL LEAGUE 26 */
+            )}
+
+            {phase === 'title' && (
+              /* 2. ONLY HOSTEL LEAGUE 26 */
               <motion.div
-                key="vertical-hl26-title"
-                initial={{ opacity: 0, y: 16 }}
+                key="vertical-title-phase"
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.45, ease: 'easeOut' }}
+                exit={{ opacity: 0, y: -10, transition: { duration: 0.25 } }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
                 className="flex flex-col items-center justify-center space-y-2 select-none"
               >
-                <motion.h1
-                  initial={{ opacity: 0, scale: 0.92 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4 }}
-                  className="text-3xl sm:text-4xl font-black text-white tracking-widest uppercase leading-tight font-display"
-                >
+                <h1 className="text-3xl sm:text-4xl font-black text-white tracking-widest uppercase leading-tight font-display">
                   HOSTEL LEAGUE
-                </motion.h1>
+                </h1>
 
-                <motion.div
-                  initial={{ opacity: 0, scale: 1.3 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.15, duration: 0.35, ease: 'backOut' }}
-                  className="inline-block px-5 py-1.5 rounded-xl bg-emerald-600 text-white font-black text-4xl sm:text-5xl tracking-tight shadow-xl border border-emerald-400/40"
-                >
+                <div className="inline-block px-5 py-1.5 rounded-xl bg-emerald-600 text-white font-black text-4xl sm:text-5xl tracking-tight shadow-xl border border-emerald-400/40">
                   26
-                </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {phase === 'teams' && (
+              /* 3. ALL 6 TEAMS VERTICALLY STACKED */
+              <motion.div
+                key="vertical-teams-phase"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                transition={{ duration: 0.35 }}
+                className="w-full flex flex-col items-center space-y-2 select-none max-w-[260px]"
+              >
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-emerald-400 mb-0.5 block">
+                  6 OFFICIAL CLUBS
+                </span>
+
+                <div className="w-full flex flex-col space-y-1.5">
+                  {OFFICIAL_CLUBS.map((team, idx) => (
+                    <motion.div
+                      key={team.id}
+                      initial={{ opacity: 0, x: -15 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.06, duration: 0.25 }}
+                      className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg bg-white/10 border border-white/10 text-left"
+                    >
+                      <TeamBadge team={team} size="xs" />
+                      <span className="font-extrabold text-xs text-white uppercase tracking-wide truncate">
+                        {team.name}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
