@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Match, Team } from '../types/tournament';
 import { FixtureCard } from '../components/FixtureCard';
-import { Calendar } from 'lucide-react';
 
 interface FixturesPageProps {
   matches: Match[];
@@ -25,102 +23,89 @@ export const FixturesPage: React.FC<FixturesPageProps> = ({
     : rounds.filter(r => r === selectedRound);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-5 max-w-lg mx-auto">
       
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 pb-6 border-b border-stadium-800">
-        <div>
-          <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono font-bold uppercase tracking-widest mb-1.5">
-            <Calendar className="w-3.5 h-3.5" />
-            OFFICIAL TOURNAMENT SCHEDULE
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">
+              TOURNAMENT MATCHES
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5">
+              15 official fixtures across 5 rounds
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-white uppercase">
-            COMPETITION FIXTURES
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1 font-mono">
-            15 official matches across 5 single round-robin stages. Dates & kickoff times announced by tournament officials.
-          </p>
-        </div>
 
-        {/* Round Filter Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-stadium-900 border border-stadium-750 overflow-x-auto max-w-full font-mono">
-          <button
-            onClick={() => setSelectedRound('ALL')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-              selectedRound === 'ALL'
-                ? 'bg-gold-500 text-stadium-980 shadow-md font-black'
-                : 'text-slate-400 hover:text-white hover:bg-stadium-850'
-            }`}
-          >
-            ALL ROUNDS
-          </button>
-          {rounds.map(r => (
+          {/* Quick Round Filters */}
+          <div className="flex items-center gap-1 overflow-x-auto py-1">
             <button
-              key={r}
-              onClick={() => setSelectedRound(r)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                selectedRound === r
-                  ? 'bg-gold-500 text-stadium-980 shadow-md font-black'
-                  : 'text-slate-400 hover:text-white hover:bg-stadium-850'
+              onClick={() => setSelectedRound('ALL')}
+              className={`px-2.5 py-1 rounded text-xs font-bold uppercase transition-colors shrink-0 cursor-pointer ${
+                selectedRound === 'ALL'
+                  ? 'bg-green-700 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              ROUND {String(r).padStart(2, '0')}
+              All
             </button>
-          ))}
+            {rounds.map(r => (
+              <button
+                key={r}
+                onClick={() => setSelectedRound(r)}
+                className={`px-2 py-1 rounded text-xs font-bold uppercase transition-colors shrink-0 cursor-pointer ${
+                  selectedRound === r
+                    ? 'bg-green-700 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                R{r}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Rounds Grouping with Entrance Animation */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={selectedRound}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-12"
-        >
-          {filteredRounds.map(roundNum => {
-            const roundMatches = matches
-              .filter(m => m.round_number === roundNum)
-              .sort((a, b) => a.match_number - b.match_number);
+      {/* Rounds List */}
+      <div className="space-y-6">
+        {filteredRounds.map(roundNum => {
+          const roundMatches = matches
+            .filter(m => m.round_number === roundNum)
+            .sort((a, b) => a.match_number - b.match_number);
 
-            return (
-              <section key={roundNum} className="space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-stadium-800/80">
-                  <div className="flex items-center gap-3">
-                    <div className="h-6 w-1 rounded-full bg-emerald-400" />
-                    <h2 className="text-xl sm:text-2xl font-black font-display uppercase tracking-tight text-white">
-                      ROUND {String(roundNum).padStart(2, '0')}
-                    </h2>
-                  </div>
-                  <span className="text-xs font-mono text-slate-400 font-bold">
-                    3 OFFICIAL FIXTURES
-                  </span>
-                </div>
+          return (
+            <div key={roundNum} className="space-y-2.5">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                  <span className="w-1.5 h-3 bg-green-700 rounded-full" />
+                  ROUND {roundNum}
+                </h2>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  3 Matches
+                </span>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {roundMatches.map(match => {
-                    const home = teamsMap.get(match.home_team_id);
-                    const away = teamsMap.get(match.away_team_id);
-                    if (!home || !away) return null;
+              <div className="space-y-2.5">
+                {roundMatches.map(match => {
+                  const home = teamsMap.get(match.home_team_id);
+                  const away = teamsMap.get(match.away_team_id);
+                  if (!home || !away) return null;
 
-                    return (
-                      <FixtureCard
-                        key={match.id}
-                        match={match}
-                        homeTeam={home}
-                        awayTeam={away}
-                        onClick={() => onNavigate('match-detail', match.id)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-        </motion.div>
-      </AnimatePresence>
+                  return (
+                    <FixtureCard
+                      key={match.id}
+                      match={match}
+                      homeTeam={home}
+                      awayTeam={away}
+                      onClick={() => onNavigate('match-detail', match.id)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
     </div>
   );

@@ -46,7 +46,7 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({ onComplete }
     completedRef.current = true;
     audioService.playBroadcastHit();
     localStorage.setItem('hl26_seen_intro', 'true');
-    onComplete('quick-view');
+    onComplete('home');
   };
 
   const handleSkipToTransition = () => {

@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, getOrCreateAnonymousVoterId } from '../lib/supabase';
 import {
   Team,
   Match,
@@ -16,6 +16,8 @@ import {
   INITIAL_MATCHES,
   INITIAL_PLAYERS,
   INITIAL_COMMITTEE,
+  INITIAL_GOALS,
+  INITIAL_MOTM,
 } from '../data/initialData';
 
 const STORAGE_KEYS = {
@@ -42,9 +44,36 @@ class TournamentService {
     if (!localStorage.getItem(STORAGE_KEYS.TEAMS)) {
       localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(INITIAL_TEAMS));
     }
-    if (!localStorage.getItem(STORAGE_KEYS.MATCHES)) {
+
+    // Matches initialization: ensure historical Match 1 and Match 2 are preserved
+    const storedMatches = localStorage.getItem(STORAGE_KEYS.MATCHES);
+    if (!storedMatches) {
       localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(INITIAL_MATCHES));
+    } else {
+      try {
+        const parsed: Match[] = JSON.parse(storedMatches);
+        // Ensure Match 1 and Match 2 have their finalized historical result
+        let updated = false;
+        const mapped = parsed.map(m => {
+          if (m.id === 'match-01' && m.status !== 'COMPLETED') {
+            updated = true;
+            return { ...m, status: 'COMPLETED' as const, home_score: 1, away_score: 1 };
+          }
+          if (m.id === 'match-02' && m.status !== 'COMPLETED') {
+            updated = true;
+            return { ...m, status: 'COMPLETED' as const, home_score: 2, away_score: 0 };
+          }
+          return m;
+        });
+        if (updated) {
+          localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(mapped));
+        }
+      } catch (e) {
+        localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(INITIAL_MATCHES));
+      }
     }
+
+    // Players initialization
     const storedPlayers = localStorage.getItem(STORAGE_KEYS.PLAYERS);
     if (!storedPlayers || JSON.parse(storedPlayers).length === 0) {
       localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(INITIAL_PLAYERS));
@@ -68,14 +97,49 @@ class TournamentService {
         console.warn('Error synchronizing stored player photos:', err);
       }
     }
-    if (!localStorage.getItem(STORAGE_KEYS.GOALS)) {
-      localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify([]));
+
+    // Goals: ensure Match 1 & Match 2 historical goals are present
+    const storedGoals = localStorage.getItem(STORAGE_KEYS.GOALS);
+    if (!storedGoals || JSON.parse(storedGoals).length === 0) {
+      localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(INITIAL_GOALS));
+    } else {
+      try {
+        const parsed: Goal[] = JSON.parse(storedGoals);
+        const hasM1Goal = parsed.some(g => g.match_id === 'match-01');
+        const hasM2Goal = parsed.some(g => g.match_id === 'match-02');
+        if (!hasM1Goal || !hasM2Goal) {
+          const merged = [...parsed];
+          if (!hasM1Goal) merged.push(...INITIAL_GOALS.filter(g => g.match_id === 'match-01'));
+          if (!hasM2Goal) merged.push(...INITIAL_GOALS.filter(g => g.match_id === 'match-02'));
+          localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(merged));
+        }
+      } catch (e) {
+        localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(INITIAL_GOALS));
+      }
     }
+
+    // MOTM: ensure Match 1 & Match 2 historical MOTMs are present
+    const storedMotm = localStorage.getItem(STORAGE_KEYS.MOTM);
+    if (!storedMotm || JSON.parse(storedMotm).length === 0) {
+      localStorage.setItem(STORAGE_KEYS.MOTM, JSON.stringify(INITIAL_MOTM));
+    } else {
+      try {
+        const parsed: ManOfTheMatch[] = JSON.parse(storedMotm);
+        const hasM1Motm = parsed.some(m => m.match_id === 'match-01');
+        const hasM2Motm = parsed.some(m => m.match_id === 'match-02');
+        if (!hasM1Motm || !hasM2Motm) {
+          const merged = [...parsed];
+          if (!hasM1Motm) merged.push(...INITIAL_MOTM.filter(m => m.match_id === 'match-01'));
+          if (!hasM2Motm) merged.push(...INITIAL_MOTM.filter(m => m.match_id === 'match-02'));
+          localStorage.setItem(STORAGE_KEYS.MOTM, JSON.stringify(merged));
+        }
+      } catch (e) {
+        localStorage.setItem(STORAGE_KEYS.MOTM, JSON.stringify(INITIAL_MOTM));
+      }
+    }
+
     if (!localStorage.getItem(STORAGE_KEYS.ASSISTS)) {
       localStorage.setItem(STORAGE_KEYS.ASSISTS, JSON.stringify([]));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.MOTM)) {
-      localStorage.setItem(STORAGE_KEYS.MOTM, JSON.stringify([]));
     }
     if (!localStorage.getItem(STORAGE_KEYS.COMMITTEE)) {
       localStorage.setItem(STORAGE_KEYS.COMMITTEE, JSON.stringify(INITIAL_COMMITTEE));
@@ -119,7 +183,7 @@ class TournamentService {
       }
     }
     const teams = await this.getTeams();
-    const updated = teams.map(t => t.id === teamId ? { ...t, manager_name: managerName } : t);
+    const updated = teams.map(t => (t.id === teamId ? { ...t, manager_name: managerName } : t));
     localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(updated));
   }
 
@@ -128,7 +192,19 @@ class TournamentService {
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.from('matches').select('*').order('match_number');
-        if (!error && data && data.length > 0) return data as Match[];
+        if (!error && data && data.length > 0) {
+          // Guard historical Match 1 and Match 2 results
+          const safeData = (data as Match[]).map(m => {
+            if (m.id === 'match-01' && m.status !== 'COMPLETED') {
+              return { ...m, status: 'COMPLETED' as const, home_score: 1, away_score: 1 };
+            }
+            if (m.id === 'match-02' && m.status !== 'COMPLETED') {
+              return { ...m, status: 'COMPLETED' as const, home_score: 2, away_score: 0 };
+            }
+            return m;
+          });
+          return safeData;
+        }
       } catch (err) {
         console.warn('Supabase getMatches error, falling back to local storage:', err);
       }
@@ -160,7 +236,7 @@ class TournamentService {
       }
     }
     const matches = await this.getMatches();
-    const updated = matches.map(m => m.id === match.id ? { ...m, ...updatedPayload } : m);
+    const updated = matches.map(m => (m.id === match.id ? { ...m, ...updatedPayload } : m));
     localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(updated));
   }
 
@@ -215,7 +291,7 @@ class TournamentService {
       }
     }
     const players = await this.getPlayers();
-    const updated = players.map(p => p.id === player.id ? updatedPlayer : p);
+    const updated = players.map(p => (p.id === player.id ? updatedPlayer : p));
     localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(updated));
   }
 
@@ -232,77 +308,97 @@ class TournamentService {
     localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(updated));
   }
 
-  // ================= GOALS & ASSISTS & MOTM =================
+  // ================= GOALS & MOTM =================
   async getGoals(): Promise<Goal[]> {
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.from('goals').select('*');
-        if (!error && data) return data as Goal[];
+        if (!error && data && data.length > 0) {
+          // Ensure historical goals for Match 1 and Match 2 are never lost
+          const list = [...(data as Goal[])];
+          INITIAL_GOALS.forEach(ig => {
+            if (!list.some(g => g.id === ig.id || (g.match_id === ig.match_id && g.player_id === ig.player_id))) {
+              list.push(ig);
+            }
+          });
+          return list;
+        }
       } catch (err) {
-        console.warn('Supabase getGoals error:', err);
+        console.warn('Supabase getGoals error, falling back to local storage:', err);
       }
     }
     this.initLocalStore();
     const stored = localStorage.getItem(STORAGE_KEYS.GOALS);
-    return stored ? JSON.parse(stored) : [];
+    return stored ? JSON.parse(stored) : INITIAL_GOALS;
   }
 
   async getAssists(): Promise<Assist[]> {
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase.from('assists').select('*');
-        if (!error && data) return data as Assist[];
-      } catch (err) {
-        console.warn('Supabase getAssists error:', err);
-      }
-    }
-    this.initLocalStore();
-    const stored = localStorage.getItem(STORAGE_KEYS.ASSISTS);
-    return stored ? JSON.parse(stored) : [];
+    return []; // Assists removed from active product
   }
 
   async getManOfTheMatches(): Promise<ManOfTheMatch[]> {
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.from('man_of_the_match').select('*');
-        if (!error && data) return data as ManOfTheMatch[];
+        if (!error && data && data.length > 0) {
+          const list = [...(data as ManOfTheMatch[])];
+          INITIAL_MOTM.forEach(im => {
+            if (!list.some(m => m.match_id === im.match_id)) {
+              list.push(im);
+            }
+          });
+          return list;
+        }
       } catch (err) {
         console.warn('Supabase getManOfTheMatches error:', err);
       }
     }
     this.initLocalStore();
     const stored = localStorage.getItem(STORAGE_KEYS.MOTM);
-    return stored ? JSON.parse(stored) : [];
+    return stored ? JSON.parse(stored) : INITIAL_MOTM;
   }
 
-  // ================= SAVE MATCH RESULT & EVENTS =================
-  async saveMatchResult(
+  // ================= SAVE MATCH EDIT (SIMPLIFIED ADMIN WORKFLOW) =================
+  async saveSimplifiedMatch(
     matchId: string,
-    homeScore: number,
-    awayScore: number,
-    goals: { player_id: string; team_id: string; minute: number; assist_player_id?: string | null }[],
-    assists: { player_id: string; team_id: string; minute?: number }[],
+    status: Match['status'],
+    fixtureDetails: {
+      scheduled_date: string | null;
+      scheduled_time: string | null;
+      venue: string | null;
+      referee: string | null;
+      assistant_referee_1: string | null;
+      assistant_referee_2: string | null;
+    },
+    homeScore: number | null,
+    awayScore: number | null,
+    goals: { player_id: string; team_id: string }[],
     motmPlayerId?: string
   ): Promise<void> {
     const matches = await this.getMatches();
     const targetMatch = matches.find(m => m.id === matchId);
     if (!targetMatch) return;
 
-    targetMatch.home_score = homeScore;
-    targetMatch.away_score = awayScore;
-    targetMatch.status = 'COMPLETED';
+    targetMatch.status = status;
+    targetMatch.scheduled_date = fixtureDetails.scheduled_date;
+    targetMatch.scheduled_time = fixtureDetails.scheduled_time;
+    targetMatch.venue = fixtureDetails.venue;
+    targetMatch.referee = fixtureDetails.referee;
+    targetMatch.assistant_referee_1 = fixtureDetails.assistant_referee_1;
+    targetMatch.assistant_referee_2 = fixtureDetails.assistant_referee_2;
+    targetMatch.home_score = status === 'COMPLETED' ? (homeScore ?? goals.filter(g => g.team_id === targetMatch.home_team_id).length) : homeScore;
+    targetMatch.away_score = status === 'COMPLETED' ? (awayScore ?? goals.filter(g => g.team_id === targetMatch.away_team_id).length) : awayScore;
     targetMatch.updated_at = new Date().toISOString();
 
     await this.updateMatch(targetMatch);
 
-    // Save Goals
+    // Prepare goals
     const newGoals: Goal[] = goals.map(g => ({
       id: generateId('goal'),
       match_id: matchId,
       player_id: g.player_id,
       team_id: g.team_id,
-      minute: g.minute,
-      assist_player_id: g.assist_player_id || null,
+      minute: 0,
       created_at: new Date().toISOString(),
     }));
 
@@ -320,31 +416,7 @@ class TournamentService {
     allGoals.push(...newGoals);
     localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(allGoals));
 
-    // Save Assists
-    const newAssists: Assist[] = assists.map(a => ({
-      id: generateId('assist'),
-      match_id: matchId,
-      player_id: a.player_id,
-      team_id: a.team_id,
-      minute: a.minute,
-      created_at: new Date().toISOString(),
-    }));
-
-    if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('assists').delete().eq('match_id', matchId);
-        if (newAssists.length > 0) {
-          await supabase.from('assists').insert(newAssists);
-        }
-      } catch (err) {
-        console.warn('Supabase assists sync error:', err);
-      }
-    }
-    const allAssists = (await this.getAssists()).filter(a => a.match_id !== matchId);
-    allAssists.push(...newAssists);
-    localStorage.setItem(STORAGE_KEYS.ASSISTS, JSON.stringify(allAssists));
-
-    // Save MOTM
+    // Prepare MOTM
     if (motmPlayerId) {
       const motmItem: ManOfTheMatch = {
         id: generateId('motm'),
@@ -364,6 +436,37 @@ class TournamentService {
       allMotm.push(motmItem);
       localStorage.setItem(STORAGE_KEYS.MOTM, JSON.stringify(allMotm));
     }
+  }
+
+  // Legacy helper signature kept for backwards compatibility
+  async saveMatchResult(
+    matchId: string,
+    homeScore: number,
+    awayScore: number,
+    goals: { player_id: string; team_id: string; minute: number; assist_player_id?: string | null }[],
+    _assists: { player_id: string; team_id: string; minute?: number }[],
+    motmPlayerId?: string
+  ): Promise<void> {
+    const matches = await this.getMatches();
+    const targetMatch = matches.find(m => m.id === matchId);
+    if (!targetMatch) return;
+
+    await this.saveSimplifiedMatch(
+      matchId,
+      'COMPLETED',
+      {
+        scheduled_date: targetMatch.scheduled_date,
+        scheduled_time: targetMatch.scheduled_time,
+        venue: targetMatch.venue,
+        referee: targetMatch.referee,
+        assistant_referee_1: targetMatch.assistant_referee_1,
+        assistant_referee_2: targetMatch.assistant_referee_2,
+      },
+      homeScore,
+      awayScore,
+      goals.map(g => ({ player_id: g.player_id, team_id: g.team_id })),
+      motmPlayerId
+    );
   }
 
   // ================= COMMITTEE =================
@@ -390,11 +493,11 @@ class TournamentService {
       }
     }
     const members = await this.getCommitteeMembers();
-    const updated = members.map(m => m.id === member.id ? member : m);
+    const updated = members.map(m => (m.id === member.id ? member : m));
     localStorage.setItem(STORAGE_KEYS.COMMITTEE, JSON.stringify(updated));
   }
 
-  // ================= POTM POLLS =================
+  // ================= POTM POLLS & FAST ANONYMOUS VOTING =================
   async getPolls(): Promise<POTMPoll[]> {
     if (isSupabaseConfigured && supabase) {
       try {
@@ -446,7 +549,6 @@ class TournamentService {
     polls.unshift(newPoll);
     localStorage.setItem(STORAGE_KEYS.POLLS, JSON.stringify(polls));
 
-    const candidates = await this.getCandidates(pollId);
     const storedCandidates = localStorage.getItem(STORAGE_KEYS.CANDIDATES);
     const allCandidates: POTMCandidate[] = storedCandidates ? JSON.parse(storedCandidates) : [];
     allCandidates.push(...newCandidates);
@@ -467,7 +569,7 @@ class TournamentService {
       }
     }
     const polls = await this.getPolls();
-    const updated = polls.map(p => p.id === pollId ? { ...p, status: 'closed' as const, closed_at: new Date().toISOString() } : p);
+    const updated = polls.map(p => (p.id === pollId ? { ...p, status: 'closed' as const, closed_at: new Date().toISOString() } : p));
     localStorage.setItem(STORAGE_KEYS.POLLS, JSON.stringify(updated));
   }
 
@@ -501,47 +603,69 @@ class TournamentService {
     return all.filter(v => v.poll_id === pollId);
   }
 
-  async submitVote(pollId: string, candidateId: string, userId: string): Promise<{ success: boolean; error?: string }> {
-    if (!pollId || !candidateId || !userId) {
-      return { success: false, error: 'Poll, candidate, and user identity are required.' };
+  // Fast, frictionless anonymous public voting: NO email, NO password, NO OTP
+  async submitVote(pollId: string, candidateId: string, customUserId?: string): Promise<{ success: boolean; error?: string }> {
+    if (!pollId || !candidateId) {
+      return { success: false, error: 'Poll and candidate selection are required.' };
     }
+
+    const voterId = customUserId || getOrCreateAnonymousVoterId();
+
+    // Check local storage duplicate prevention first
+    const storedVotes = localStorage.getItem(STORAGE_KEYS.VOTES);
+    const allVotes: POTMVote[] = storedVotes ? JSON.parse(storedVotes) : [];
+    const alreadyVotedLocally = allVotes.some(v => v.poll_id === pollId && v.user_id === voterId);
+    if (alreadyVotedLocally) {
+      return { success: false, error: 'You have already voted in this poll.' };
+    }
+
+    const newVote: POTMVote = {
+      id: generateId('vote'),
+      poll_id: pollId,
+      candidate_id: candidateId,
+      user_id: voterId,
+      created_at: new Date().toISOString(),
+    };
 
     if (isSupabaseConfigured && supabase) {
       try {
+        // Try to get existing auth user or attempt anonymous sign in
+        let effectiveUserId = voterId;
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData?.session?.user) {
+          effectiveUserId = sessionData.session.user.id;
+        } else {
+          try {
+            const { data: anonData } = await supabase.auth.signInAnonymously();
+            if (anonData?.user) {
+              effectiveUserId = anonData.user.id;
+            }
+          } catch {
+            // Anonymous sign-in not enabled in remote Supabase dashboard; proceed with voterId
+          }
+        }
+
         const { error } = await supabase.from('potm_votes').insert({
-          id: generateId('vote'),
+          id: newVote.id,
           poll_id: pollId,
           candidate_id: candidateId,
-          user_id: userId,
-          created_at: new Date().toISOString(),
+          user_id: effectiveUserId,
+          created_at: newVote.created_at,
         });
+
         if (error) {
           if (error.code === '23505' || error.message.includes('unique')) {
             return { success: false, error: 'You have already voted in this poll.' };
           }
-          return { success: false, error: error.message };
+          console.warn('Supabase vote insert notice (storing vote locally):', error.message);
         }
       } catch (err: any) {
-        console.warn('Supabase submitVote error:', err);
-        return { success: false, error: err.message || 'Voting failed.' };
+        console.warn('Supabase vote notice (storing locally):', err);
       }
     }
 
-    // Local Storage Fallback
-    const storedVotes = localStorage.getItem(STORAGE_KEYS.VOTES);
-    const allVotes: POTMVote[] = storedVotes ? JSON.parse(storedVotes) : [];
-    const alreadyVoted = allVotes.some(v => v.poll_id === pollId && v.user_id === userId);
-    if (alreadyVoted) {
-      return { success: false, error: 'You have already voted in this poll.' };
-    }
-
-    allVotes.push({
-      id: generateId('vote'),
-      poll_id: pollId,
-      candidate_id: candidateId,
-      user_id: userId,
-      created_at: new Date().toISOString(),
-    });
+    // Always record locally so vote is never lost
+    allVotes.push(newVote);
     localStorage.setItem(STORAGE_KEYS.VOTES, JSON.stringify(allVotes));
 
     return { success: true };
@@ -552,9 +676,9 @@ class TournamentService {
     localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(INITIAL_TEAMS));
     localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(INITIAL_MATCHES));
     localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(INITIAL_PLAYERS));
-    localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(INITIAL_GOALS));
     localStorage.setItem(STORAGE_KEYS.ASSISTS, JSON.stringify([]));
-    localStorage.setItem(STORAGE_KEYS.MOTM, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.MOTM, JSON.stringify(INITIAL_MOTM));
     localStorage.setItem(STORAGE_KEYS.COMMITTEE, JSON.stringify(INITIAL_COMMITTEE));
     localStorage.setItem(STORAGE_KEYS.POLLS, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.CANDIDATES, JSON.stringify([]));

@@ -162,11 +162,12 @@ CREATE POLICY "Public candidates viewable" ON potm_candidates FOR SELECT USING (
 DROP POLICY IF EXISTS "Public votes viewable" ON potm_votes;
 CREATE POLICY "Public votes viewable" ON potm_votes FOR SELECT USING (true);
 
--- AUTHENTICATED USER VOTING POLICY
+-- AUTHENTICATED OR ANONYMOUS USER VOTING POLICY (NO EMAIL REQUIRED)
 DROP POLICY IF EXISTS "Authenticated users can vote once" ON potm_votes;
-CREATE POLICY "Authenticated users can vote once" ON potm_votes 
-  FOR INSERT TO authenticated 
-  WITH CHECK (auth.uid()::text = user_id);
+DROP POLICY IF EXISTS "Public can vote once" ON potm_votes;
+CREATE POLICY "Public can vote once" ON potm_votes 
+  FOR INSERT TO anon, authenticated 
+  WITH CHECK (true);
 
 -- ADMIN FULL ACCESS (Authenticated)
 DROP POLICY IF EXISTS "Admin full access teams" ON teams;
@@ -218,11 +219,11 @@ SET name = EXCLUDED.name,
     primary_color = EXCLUDED.primary_color,
     secondary_color = EXCLUDED.secondary_color;
 
--- 2. SEED THE 15 OFFICIAL FIXTURES (DATE TBA, TIME TBA, VENUE TBA, OFFICIALS TBA, STATUS UPCOMING)
-INSERT INTO matches (id, match_number, round_number, home_team_id, away_team_id, scheduled_date, scheduled_time, venue, referee, assistant_referee_1, assistant_referee_2, status) VALUES
-  ('match-01', 1, 1, 'team-fulham', 'team-aston-villa', NULL, NULL, NULL, NULL, NULL, NULL, 'UPCOMING'),
-  ('match-02', 2, 1, 'team-spurs', 'team-crystal-palace', NULL, NULL, NULL, NULL, NULL, NULL, 'UPCOMING'),
-  ('match-03', 3, 1, 'team-nottingham-forest', 'team-brighton', NULL, NULL, NULL, NULL, NULL, NULL, 'UPCOMING'),
+-- 2. SEED THE 15 OFFICIAL FIXTURES (Match 1 & 2 Completed; Matches 3 to 15 Upcoming)
+INSERT INTO matches (id, match_number, round_number, home_team_id, away_team_id, scheduled_date, scheduled_time, venue, referee, assistant_referee_1, assistant_referee_2, status, home_score, away_score) VALUES
+  ('match-01', 1, 1, 'team-fulham', 'team-aston-villa', NULL, NULL, NULL, NULL, NULL, NULL, 'COMPLETED', 1, 1),
+  ('match-02', 2, 1, 'team-spurs', 'team-crystal-palace', NULL, NULL, NULL, NULL, NULL, NULL, 'COMPLETED', 2, 0),
+  ('match-03', 3, 1, 'team-nottingham-forest', 'team-brighton', NULL, NULL, NULL, NULL, NULL, NULL, 'UPCOMING', NULL, NULL),
   ('match-04', 4, 2, 'team-crystal-palace', 'team-fulham', NULL, NULL, NULL, NULL, NULL, NULL, 'UPCOMING'),
   ('match-05', 5, 2, 'team-brighton', 'team-aston-villa', NULL, NULL, NULL, NULL, NULL, NULL, 'UPCOMING'),
   ('match-06', 6, 2, 'team-nottingham-forest', 'team-spurs', NULL, NULL, NULL, NULL, NULL, NULL, 'UPCOMING'),
@@ -321,3 +322,17 @@ SET name = EXCLUDED.name,
     role = EXCLUDED.role,
     phone = EXCLUDED.phone,
     display_order = EXCLUDED.display_order;
+
+-- 5. SEED HISTORICAL GOALS (Match 1 & Match 2)
+INSERT INTO goals (id, match_id, player_id, team_id, minute) VALUES
+  ('goal-m1-fulham-jaseen', 'match-01', 'player-fulham-06', 'team-fulham', 12),
+  ('goal-m1-villa-shehzad', 'match-01', 'player-villa-07', 'team-aston-villa', 18),
+  ('goal-m2-spurs-ashin-1', 'match-02', 'player-spurs-05', 'team-spurs', 8),
+  ('goal-m2-spurs-ashin-2', 'match-02', 'player-spurs-05', 'team-spurs', 20)
+ON CONFLICT (id) DO NOTHING;
+
+-- 6. SEED HISTORICAL MAN OF THE MATCH (Match 1 & Match 2)
+INSERT INTO man_of_the_match (id, match_id, player_id) VALUES
+  ('motm-match-01', 'match-01', 'player-villa-02'),
+  ('motm-match-02', 'match-02', 'player-spurs-02')
+ON CONFLICT (id) DO NOTHING;

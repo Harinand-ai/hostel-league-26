@@ -14,7 +14,7 @@ export const TeamBadge: React.FC<TeamBadgeProps> = ({
   team,
   size = 'md',
   showName = false,
-  nameClassName = 'text-sm font-bold tracking-tight text-slate-100',
+  nameClassName = 'text-sm font-bold tracking-tight text-slate-900',
   className = '',
   glow = false,
 }) => {

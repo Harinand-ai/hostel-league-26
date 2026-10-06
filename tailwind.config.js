@@ -8,54 +8,46 @@ export default {
   theme: {
     extend: {
       colors: {
-        stadium: {
-          980: '#030509',
-          950: '#06090F', // Ultra deep cyber black background
-          900: '#0C111C', // Secondary dark surface
-          850: '#121A2A', // Elevated card surface
-          800: '#182337', // Elevated border
-          750: '#212E47',
-          700: '#2C3D5D',
-          600: '#3D537D',
-          500: '#526E9F',
-          400: '#7995C2',
-          300: '#9DB3D6', // Crisp secondary text
-          200: '#CAD7EC',
-          100: '#F4F7FC', // Crisp white primary text
-        },
-        gold: {
-          300: '#FFF066',
-          400: '#FFE600', // Electric neon gold
-          500: '#FFC700',
-          600: '#E6A800',
+        football: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          500: '#22c55e',
+          600: '#16a34a', // Primary football green
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
         },
         pitch: {
-          300: '#5CFFAC',
-          400: '#00FF85', // Electric cyber neon green
-          500: '#00E575',
-          600: '#00B359',
-          950: '#021F12',
+          400: '#16a34a',
+          500: '#15803d',
+          600: '#166534',
+          950: '#052e16',
         },
-        neon: {
-          green: '#00FF85',
-          cyan: '#00F0FF',
-          gold: '#FFE600',
-          pink: '#FF007F',
-          purple: '#A855F7',
-        }
+        gold: {
+          400: '#d97706',
+          500: '#b45309',
+        },
+        stadium: {
+          980: '#0f172a',
+          950: '#0f172a',
+          900: '#1e293b',
+          850: '#334155',
+          800: '#e2e8f0',
+          750: '#cbd5e1',
+          700: '#94a3b8',
+          600: '#64748b',
+          500: '#475569',
+          400: '#334155',
+          300: '#1e293b',
+          200: '#0f172a',
+          100: '#020617',
+        },
       },
       fontFamily: {
-        display: ['Cabinet Grotesk', 'Outfit', 'sans-serif'],
+        display: ['Inter', 'Outfit', 'sans-serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-      },
-      boxShadow: {
-        'broadcast': '0 8px 32px -4px rgba(0, 0, 0, 0.85), 0 0 1px 1px rgba(255, 255, 255, 0.05)',
-        'broadcast-sm': '0 4px 16px -2px rgba(0, 0, 0, 0.7)',
-        'neon-green': '0 0 25px -4px rgba(0, 255, 133, 0.5)',
-        'neon-cyan': '0 0 25px -4px rgba(0, 240, 255, 0.5)',
-        'neon-gold': '0 0 25px -4px rgba(255, 230, 0, 0.45)',
-        'neon-glow': '0 0 15px 0 rgba(0, 255, 133, 0.3)',
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         'card': '12px',

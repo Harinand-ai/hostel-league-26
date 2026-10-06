@@ -1,4 +1,4 @@
-import { Team, Match, Player, CommitteeMember, TournamentRule } from '../types/tournament';
+import { Team, Match, Player, CommitteeMember, TournamentRule, Goal, ManOfTheMatch } from '../types/tournament';
 
 export const INITIAL_TEAMS: Team[] = [
   {
@@ -65,9 +65,9 @@ export const INITIAL_MATCHES: Match[] = [
     referee: null,
     assistant_referee_1: null,
     assistant_referee_2: null,
-    status: 'UPCOMING',
-    home_score: null,
-    away_score: null,
+    status: 'COMPLETED',
+    home_score: 1,
+    away_score: 1,
   },
   {
     id: 'match-02',
@@ -81,9 +81,9 @@ export const INITIAL_MATCHES: Match[] = [
     referee: null,
     assistant_referee_1: null,
     assistant_referee_2: null,
-    status: 'UPCOMING',
-    home_score: null,
-    away_score: null,
+    status: 'COMPLETED',
+    home_score: 2,
+    away_score: 0,
   },
   {
     id: 'match-03',
@@ -362,7 +362,7 @@ export const INITIAL_PLAYERS: Player[] = [
 
   // 6. ASTON VILLA (Manager: Sinan)
   { id: 'player-villa-01', team_id: 'team-aston-villa', name: 'Ashik', position: 'MID', is_captain: true, photo_url: '/photos/Ashik Krishnan.jpg' },
-  { id: 'player-villa-02', team_id: 'team-aston-villa', name: 'Abdu', position: 'MID', is_captain: false, photo_url: '/photos/Abdu Rahman.JPG' },
+  { id: 'player-villa-02', team_id: 'team-aston-villa', name: 'Abdu Rahman', position: 'MID', is_captain: false, photo_url: '/photos/Abdu Rahman.JPG' },
   { id: 'player-villa-03', team_id: 'team-aston-villa', name: 'Tahsin', position: 'CB', is_captain: false, photo_url: '/photos/Md Tahsin.jpg' },
   { id: 'player-villa-04', team_id: 'team-aston-villa', name: 'Yedhukrishna', position: 'GK', is_captain: false, photo_url: '/photos/Yadhukrishna.jpg' },
   { id: 'player-villa-05', team_id: 'team-aston-villa', name: 'Adhith Anil', position: 'CF', is_captain: false, photo_url: '/photos/Adith Anil.jpeg' },
@@ -464,3 +464,52 @@ export const TOURNAMENT_RULES: TournamentRule[] = [
     description: 'A minimum of 6 players should reach the ground and be ready before the main referee arrives. If not, the team will be disqualified.',
   },
 ];
+
+// OFFICIAL HISTORICAL GOALS (Match 1 & Match 2)
+export const INITIAL_GOALS: Goal[] = [
+  // Match 01: Fulham 1 - 1 Aston Villa
+  {
+    id: 'goal-m1-fulham-jaseen',
+    match_id: 'match-01',
+    player_id: 'player-fulham-06', // Jaseen
+    team_id: 'team-fulham',
+    minute: 12,
+  },
+  {
+    id: 'goal-m1-villa-shehzad',
+    match_id: 'match-01',
+    player_id: 'player-villa-07', // Shehzad
+    team_id: 'team-aston-villa',
+    minute: 18,
+  },
+  // Match 02: Spurs 2 - 0 Crystal Palace
+  {
+    id: 'goal-m2-spurs-ashin-1',
+    match_id: 'match-02',
+    player_id: 'player-spurs-05', // Ashin
+    team_id: 'team-spurs',
+    minute: 8,
+  },
+  {
+    id: 'goal-m2-spurs-ashin-2',
+    match_id: 'match-02',
+    player_id: 'player-spurs-05', // Ashin
+    team_id: 'team-spurs',
+    minute: 20,
+  },
+];
+
+// OFFICIAL HISTORICAL MAN OF THE MATCH (Match 1 & Match 2)
+export const INITIAL_MOTM: ManOfTheMatch[] = [
+  {
+    id: 'motm-match-01',
+    match_id: 'match-01',
+    player_id: 'player-villa-02', // Abdu Rahman (Aston Villa)
+  },
+  {
+    id: 'motm-match-02',
+    match_id: 'match-02',
+    player_id: 'player-spurs-02', // Adithya (Spurs, GK)
+  },
+];
+

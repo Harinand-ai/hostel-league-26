@@ -2,11 +2,7 @@ import React from 'react';
 import { Team, Match, TeamStanding, PlayerStatEntry, Player } from '../types/tournament';
 import { BroadcastMatchHero } from '../components/BroadcastMatchHero';
 import { ResultCard } from '../components/ResultCard';
-import { LeagueTable } from '../components/LeagueTable';
-import { TopScorers } from '../components/TopScorers';
-import { EmptyState } from '../components/EmptyState';
-import { CommitteeSection } from '../components/CommitteeSection';
-import { Trophy, ArrowRight, Shield, ArrowUpRight, BookOpen } from 'lucide-react';
+import { Radio, ArrowRight, Trophy, Award, Shield, FileText, PhoneCall } from 'lucide-react';
 
 interface HomePageProps {
   teams: Team[];
@@ -34,75 +30,72 @@ export const HomePage: React.FC<HomePageProps> = ({
   const nextHomeTeam = nextMatch ? teamsMap.get(nextMatch.home_team_id) : null;
   const nextAwayTeam = nextMatch ? teamsMap.get(nextMatch.away_team_id) : null;
 
-  // Completed matches for latest results strip
+  // Completed matches for latest result
   const completedMatches = matches.filter(m => m.status === 'COMPLETED');
   const latestMatch = completedMatches.length > 0 ? completedMatches[completedMatches.length - 1] : null;
   const latestHomeTeam = latestMatch ? teamsMap.get(latestMatch.home_team_id) : null;
   const latestAwayTeam = latestMatch ? teamsMap.get(latestMatch.away_team_id) : null;
 
   return (
-    <div className="space-y-14 md:space-y-16">
+    <div className="space-y-6">
       
-      {/* 1. EDITORIAL TOURNAMENT HERO */}
-      <section className="pt-2 pb-2">
-        <div className="max-w-4xl">
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-widest text-pitch-500 uppercase mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-pitch-500" />
-            <span>OFFICIAL FOOTBALL CHAMPIONSHIP</span>
+      {/* 1. TOURNAMENT TITLE & INTRO */}
+      <div className="text-center sm:text-left pt-1">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold tracking-wide uppercase mb-2 border border-emerald-200">
+          <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+          <span>Official Tournament Portal</span>
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight uppercase">
+          HOSTEL LEAGUE 26
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-600 mt-1">
+          Six Clubs • Five Rounds • Fifteen Matches • Official Records & Statistics
+        </p>
+      </div>
+
+      {/* 2. HIGH-VISIBILITY PROMINENT LIVE MATCH BUTTON */}
+      <a
+        href="https://hostelleague.vercel.app/"
+        target="_blank"
+        rel="noopener noreferrer"
+        id="live-match-portal-link"
+        className="block group p-4 sm:p-5 rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 text-white shadow-md hover:shadow-lg transition-all"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <Radio className="w-5 h-5 text-white animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-base sm:text-lg tracking-wide uppercase">
+                  LIVE MATCH CENTRE
+                </span>
+                <span className="text-[10px] bg-white text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase">
+                  LIVE
+                </span>
+              </div>
+              <p className="text-xs text-emerald-100 font-medium mt-0.5">
+                Watch the current match, live score & real-time pitch action
+              </p>
+            </div>
           </div>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black font-display tracking-tight text-white uppercase leading-none">
-            HOSTEL LEAGUE <span className="text-gold-400">26</span>
-          </h1>
-
-          {/* TOURNAMENT CORE METRICS: 6 CLUBS • 15 FIXTURES • 5 ROUNDS */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs sm:text-sm">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black font-display text-white">6</span>
-              <span className="text-[#9EA4AD] tracking-wider uppercase text-xs font-semibold">Clubs</span>
-            </div>
-            <span className="text-stadium-700 select-none hidden sm:inline">|</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black font-display text-white">15</span>
-              <span className="text-[#9EA4AD] tracking-wider uppercase text-xs font-semibold">Fixtures</span>
-            </div>
-            <span className="text-stadium-700 select-none hidden sm:inline">|</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black font-display text-white">5</span>
-              <span className="text-[#9EA4AD] tracking-wider uppercase text-xs font-semibold">Rounds</span>
-            </div>
-            <span className="text-stadium-700 select-none hidden sm:inline">|</span>
-            <span className="text-pitch-500 font-bold tracking-wider uppercase text-xs">
-              Single Round-Robin
-            </span>
-          </div>
-
-          {/* Quick Tournament Overview Layer Bridge */}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => onNavigate('quick-view')}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-badge bg-pitch-950/40 hover:bg-pitch-900/60 border border-pitch-800/60 text-xs font-mono font-bold text-pitch-400 hover:text-white transition-colors"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-pitch-500 animate-pulse" />
-              <span>QUICK TOURNAMENT VIEW</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </button>
-            <span className="text-[11px] font-mono text-[#9EA4AD]">
-              Instant fixtures, standings & committee contacts
-            </span>
+          <div className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-emerald-800 font-bold text-xs uppercase tracking-wide group-hover:bg-emerald-50 transition-colors shrink-0">
+            <span>Watch Live</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </div>
-      </section>
+      </a>
 
-      {/* 2. NEXT MATCH — LARGE BROADCAST COMPOSITION */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between pb-1 border-b border-stadium-800">
-          <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-[#F4F4F0]">
-            NEXT MATCH
+      {/* 3. NEXT MATCH */}
+      <section className="space-y-2.5">
+        <div className="flex items-center justify-between pb-1">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <span>NEXT MATCH</span>
           </h2>
           <button
-            onClick={() => onNavigate('fixtures')}
-            className="text-xs font-mono text-[#9EA4AD] hover:text-white transition-colors flex items-center gap-1"
+            onClick={() => onNavigate('matches')}
+            className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1"
           >
             <span>All 15 Fixtures</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -117,24 +110,23 @@ export const HomePage: React.FC<HomePageProps> = ({
             onClick={() => onNavigate('match-detail', nextMatch.id)}
           />
         ) : (
-          <EmptyState
-            title="ALL FIXTURES CONCLUDED"
-            description="The 15 official round-robin matches of Hostel League 26 have finished."
-          />
+          <div className="p-6 text-center bg-white rounded-xl border border-slate-200 text-slate-500 text-xs">
+            All tournament fixtures concluded.
+          </div>
         )}
       </section>
 
-      {/* 3. LATEST RESULTS — HORIZONTAL MATCH STRIP */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between pb-1 border-b border-stadium-800">
-          <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-[#F4F4F0]">
-            LATEST RESULT
+      {/* 4. LATEST RESULT */}
+      <section className="space-y-2.5">
+        <div className="flex items-center justify-between pb-1">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <span>LATEST RESULT</span>
           </h2>
           <button
-            onClick={() => onNavigate('results')}
-            className="text-xs font-mono text-[#9EA4AD] hover:text-white transition-colors flex items-center gap-1"
+            onClick={() => onNavigate('matches')}
+            className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1"
           >
-            <span>All Results</span>
+            <span>Past Matches</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -147,131 +139,69 @@ export const HomePage: React.FC<HomePageProps> = ({
             onClick={() => onNavigate('match-detail', latestMatch.id)}
           />
         ) : (
-          <EmptyState
-            title="NO RESULTS YET"
-            description="No matches have been completed. Once fixtures conclude and scores are verified by match officials, official results will appear here."
-            icon={Trophy}
-          />
+          <div className="p-6 text-center bg-white rounded-xl border border-slate-200 text-slate-500 text-xs">
+            No completed matches recorded yet.
+          </div>
         )}
       </section>
 
-      {/* 4. LEAGUE TABLE & TOP SCORERS DUAL EDITORIAL SECTION */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* League Table Preview (2 Cols) */}
-        <div className="lg:col-span-2 space-y-3">
-          <div className="flex items-center justify-between pb-1 border-b border-stadium-800">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-[#F4F4F0] flex items-center gap-2">
-              <Shield className="w-3.5 h-3.5 text-pitch-500" />
-              <span>LEAGUE TABLE</span>
-            </h2>
-            <button
-              onClick={() => onNavigate('table')}
-              className="text-xs font-mono text-[#9EA4AD] hover:text-white transition-colors flex items-center gap-1"
-            >
-              <span>Full Standings</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <LeagueTable
-            standings={standings}
-            isCompact={true}
-            onTeamClick={(teamId) => onNavigate('team-detail', teamId)}
-          />
-        </div>
-
-        {/* Top Scorers Preview (1 Col) */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between pb-1 border-b border-stadium-800">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-[#F4F4F0]">
-              TOP SCORERS
-            </h2>
-            <button
-              onClick={() => onNavigate('stats')}
-              className="text-xs font-mono text-[#9EA4AD] hover:text-white transition-colors flex items-center gap-1"
-            >
-              <span>All Stats</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <TopScorers
-            scorers={topScorers}
-            limit={4}
-            allPlayers={players}
-            onSelectPlayer={onSelectPlayer}
-            onViewAll={() => onNavigate('stats')}
-          />
-        </div>
-
-      </section>
-
-      {/* 5. TOURNAMENT INFORMATION */}
-      <section className="space-y-3 pt-6 border-t border-stadium-800">
-        <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-[#F4F4F0]">
+      {/* 5. QUICK TOURNAMENT INFORMATION */}
+      <section className="p-4 sm:p-5 rounded-xl bg-white border border-slate-200 shadow-sm space-y-3">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
           TOURNAMENT INFORMATION
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-5 px-6 rounded-card bg-stadium-900 border border-stadium-800 font-mono text-xs">
-          <div>
-            <span className="text-[#9EA4AD] uppercase text-[10px] block">TOTAL CLUBS</span>
-            <span className="font-bold text-sm sm:text-base text-white mt-1 block">6 CLUBS</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase block">Clubs</span>
+            <span className="text-lg font-bold text-slate-900 mt-0.5 block">6 TEAMS</span>
           </div>
-          <div>
-            <span className="text-[#9EA4AD] uppercase text-[10px] block">FORMAT</span>
-            <span className="font-bold text-sm sm:text-base text-pitch-500 mt-1 block">5 ROUNDS • 15 MATCHES</span>
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase block">Schedule</span>
+            <span className="text-lg font-bold text-emerald-700 mt-0.5 block">15 MATCHES</span>
           </div>
-          <div>
-            <span className="text-[#9EA4AD] uppercase text-[10px] block">COMPETITION</span>
-            <span className="font-bold text-sm sm:text-base text-white mt-1 block">SINGLE ROUND-ROBIN</span>
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase block">Format</span>
+            <span className="text-lg font-bold text-slate-900 mt-0.5 block">5 ROUNDS</span>
           </div>
-          <div>
-            <span className="text-[#9EA4AD] uppercase text-[10px] block">POINTS SYSTEM</span>
-            <span className="font-bold text-sm sm:text-base text-gold-400 mt-1 block">WIN 3 PTS • DRAW 1 PT</span>
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase block">Standings</span>
+            <span className="text-lg font-bold text-slate-900 mt-0.5 block">W 3 • D 1 • L 0</span>
           </div>
         </div>
 
-        {/* Quick Tournament Overview layer bridge */}
-        <div className="pt-2 px-1 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-[#9EA4AD]">
-          <span>Need the lightweight match schedule and committee contacts?</span>
+        {/* Quick Navigation Shortcuts */}
+        <div className="pt-2 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           <button
-            onClick={() => onNavigate('quick-view')}
-            className="inline-flex items-center gap-1.5 text-pitch-400 hover:text-white font-bold transition-colors cursor-pointer"
+            onClick={() => onNavigate('matches')}
+            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition-colors"
           >
-            <span>Open Quick Tournament View</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            <Trophy className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Fixtures & Results</span>
+          </button>
+          <button
+            onClick={() => onNavigate('teams')}
+            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition-colors"
+          >
+            <Shield className="w-3.5 h-3.5 text-blue-600" />
+            <span>Official Squads</span>
+          </button>
+          <button
+            onClick={() => onNavigate('stats')}
+            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition-colors"
+          >
+            <Award className="w-3.5 h-3.5 text-amber-600" />
+            <span>Leaderboard</span>
+          </button>
+          <button
+            onClick={() => onNavigate('rules')}
+            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition-colors"
+          >
+            <FileText className="w-3.5 h-3.5 text-slate-600" />
+            <span>Tournament Rules</span>
           </button>
         </div>
       </section>
 
-      {/* 6. TOURNAMENT RULES & REGULATIONS PROMPT BANNER */}
-      <section className="p-6 rounded-2xl bg-gradient-to-r from-stadium-900 via-[#0a0f1c] to-stadium-900 border border-stadium-750 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-broadcast">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0">
-            <BookOpen className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="font-display font-black text-lg text-white uppercase tracking-tight">
-              OFFICIAL RULES & REGULATIONS
-            </h3>
-            <p className="text-xs text-slate-400 font-mono mt-0.5">
-              Review all 12 official statutes covering 6's format, substitutions, disciplinary rules, and penalties.
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => onNavigate('rules')}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold-500 hover:bg-gold-600 text-stadium-980 font-mono font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap shadow-md cursor-pointer"
-        >
-          <span>READ 12 RULES</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
-      </section>
-
-      {/* 7. TOURNAMENT COMMITTEE (Section 17) */}
-      <CommitteeSection />
-
     </div>
   );
 };
-

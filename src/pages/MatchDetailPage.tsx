@@ -1,9 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Match, Team, Goal, Assist, ManOfTheMatch, Player } from '../types/tournament';
+import { Match, Team, Goal, ManOfTheMatch, Player } from '../types/tournament';
 import { TeamBadge } from '../components/TeamBadge';
 import { PlayerAvatar } from '../components/PlayerAvatar';
-import { Calendar, Clock, MapPin, Award, ArrowLeft, Shield, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, MapPin, Award, ArrowLeft, Radio, ArrowRight, Shield } from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
 import { POTMPollCard } from '../components/POTMPollCard';
 
@@ -12,7 +11,7 @@ interface MatchDetailPageProps {
   matches: Match[];
   teams: Team[];
   goals: Goal[];
-  assists: Assist[];
+  assists?: any[];
   motms: ManOfTheMatch[];
   players: Player[];
   onNavigate: (tab: string, param?: string) => void;
@@ -24,7 +23,6 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
   matches,
   teams,
   goals,
-  assists,
   motms,
   players,
   onNavigate,
@@ -39,9 +37,9 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
       <div className="py-12 text-center">
         <EmptyState
           title="MATCH NOT FOUND"
-          description="The requested match could not be found."
-          actionText="Back to Fixtures"
-          onAction={() => onNavigate('fixtures')}
+          description="The requested match fixture could not be located."
+          actionText="Back to Matches"
+          onAction={() => onNavigate('matches')}
         />
       </div>
     );
@@ -52,317 +50,277 @@ export const MatchDetailPage: React.FC<MatchDetailPageProps> = ({
 
   if (!homeTeam || !awayTeam) return null;
 
-  const matchGoals = goals
-    .filter(g => g.match_id === match.id)
-    .sort((a, b) => a.minute - b.minute);
+  const matchGoals = goals.filter(g => g.match_id === match.id);
+  const homeGoals = matchGoals.filter(g => g.team_id === homeTeam.id);
+  const awayGoals = matchGoals.filter(g => g.team_id === awayTeam.id);
 
-  const matchAssists = assists.filter(a => a.match_id === match.id);
   const matchMotm = motms.find(m => m.match_id === match.id);
   const motmPlayer = matchMotm ? playersMap.get(matchMotm.player_id) : null;
   const isCompleted = match.status === 'COMPLETED';
+  const isLive = match.status === 'LIVE';
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-5 max-w-lg mx-auto">
       
       {/* Back button */}
       <button
-        onClick={() => onNavigate(isCompleted ? 'results' : 'fixtures')}
-        className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+        onClick={() => onNavigate('matches')}
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to {isCompleted ? 'Results' : 'Fixtures'}
+        <span>Back to Matches</span>
       </button>
 
-      {/* Main Match Scorecard */}
-      <div className="relative overflow-hidden rounded-3xl bg-[#090d16] border border-stadium-750 shadow-broadcast">
+      {/* Main Match Header Card */}
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
         
-        {/* Glow halos */}
-        <div
-          className="absolute -top-20 -left-20 w-72 h-72 rounded-full blur-[90px] opacity-25 pointer-events-none"
-          style={{ backgroundColor: homeTeam.primary_color }}
-        />
-        <div
-          className="absolute -top-20 -right-20 w-72 h-72 rounded-full blur-[90px] opacity-25 pointer-events-none"
-          style={{ backgroundColor: awayTeam.primary_color }}
-        />
-
-        {/* Header bar */}
-        <div className="relative z-10 flex items-center justify-between px-6 sm:px-8 py-3.5 bg-stadium-950/80 border-b border-stadium-800 text-xs font-mono">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-gold-400">
-              MATCH {String(match.match_number).padStart(2, '0')}
-            </span>
-            <span className="text-slate-400 font-semibold">• ROUND {match.round_number}</span>
+        {/* Status bar */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs">
+          <div className="flex items-center gap-2 font-bold text-slate-800">
+            <span>MATCH {String(match.match_number).padStart(2, '0')}</span>
+            <span className="text-slate-400 font-normal">• Round {match.round_number}</span>
           </div>
 
           <div>
-            {match.status === 'COMPLETED' && (
-              <span className="px-3 py-1 rounded text-xs font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                FULL TIME
+            {isLive ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping" />
+                LIVE
               </span>
-            )}
-            {match.status === 'UPCOMING' && (
-              <span className="px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider bg-stadium-850 text-slate-400 border border-stadium-750">
-                UPCOMING FIXTURE
+            ) : isCompleted ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                COMPLETED
               </span>
-            )}
-            {match.status === 'LIVE' && (
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse">
-                ● LIVE MATCH
-              </span>
-            )}
-            {match.status === 'POSTPONED' && (
-              <span className="px-3 py-1 rounded text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/40">
-                POSTPONED
+            ) : (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                UPCOMING
               </span>
             )}
           </div>
         </div>
 
-        {/* Score & Teams Big Display */}
-        <div className="relative z-10 p-6 sm:p-10">
-          <div className="grid grid-cols-7 items-center gap-4">
+        {/* Teams and Score Presentation */}
+        <div className="p-5 sm:p-6">
+          <div className="grid grid-cols-7 items-center gap-3">
             
             {/* Home Team */}
             <div className="col-span-3 flex flex-col items-center text-center">
-              <TeamBadge team={homeTeam} size="2xl" glow={true} />
+              <TeamBadge team={homeTeam} size="lg" />
               <button
                 onClick={() => onNavigate('team-detail', homeTeam.id)}
-                className="mt-4 font-display font-black text-lg sm:text-2xl lg:text-3xl text-white hover:text-gold-400 transition-colors uppercase tracking-tight"
+                className="mt-2 font-extrabold text-sm sm:text-base text-slate-900 hover:text-emerald-700 transition-colors uppercase leading-tight"
               >
                 {homeTeam.name}
               </button>
-              <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-400 font-mono">
-                <Shield className="w-3.5 h-3.5 text-slate-400" />
-                <span>MANAGER: <strong className="text-slate-200">{homeTeam.manager_name}</strong></span>
-              </div>
+              <span className="text-[11px] text-slate-500 font-medium mt-0.5">
+                Mgr: {homeTeam.manager_name}
+              </span>
             </div>
 
-            {/* Score Center */}
+            {/* Score / Status Center */}
             <div className="col-span-1 flex flex-col items-center justify-center">
               {isCompleted ? (
-                <div className="flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-3 rounded-2xl bg-stadium-950 border border-stadium-700 font-display font-black text-2xl sm:text-4xl text-white shadow-2xl font-mono">
-                  <span className={match.home_score! > match.away_score! ? 'text-gold-400' : ''}>
-                    {match.home_score}
-                  </span>
-                  <span className="text-slate-600 font-normal">:</span>
-                  <span className={match.away_score! > match.home_score! ? 'text-gold-400' : ''}>
-                    {match.away_score}
-                  </span>
+                <div className="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 font-extrabold text-xl sm:text-2xl text-slate-900">
+                  <span>{match.home_score}</span>
+                  <span className="mx-1 text-slate-400">-</span>
+                  <span>{match.away_score}</span>
+                </div>
+              ) : isLive ? (
+                <div className="px-3 py-1 rounded-lg bg-rose-50 border border-rose-200 font-bold text-lg text-rose-700">
+                  <span>{match.home_score ?? 0} - {match.away_score ?? 0}</span>
                 </div>
               ) : (
-                <div className="w-12 h-12 rounded-2xl bg-stadium-850 border border-stadium-750 flex items-center justify-center text-xs font-black tracking-widest text-slate-400 font-mono">
+                <span className="w-9 h-9 rounded-full bg-slate-100 text-slate-500 font-bold text-xs flex items-center justify-center">
                   VS
-                </div>
+                </span>
               )}
             </div>
 
             {/* Away Team */}
             <div className="col-span-3 flex flex-col items-center text-center">
-              <TeamBadge team={awayTeam} size="2xl" glow={true} />
+              <TeamBadge team={awayTeam} size="lg" />
               <button
                 onClick={() => onNavigate('team-detail', awayTeam.id)}
-                className="mt-4 font-display font-black text-lg sm:text-2xl lg:text-3xl text-white hover:text-gold-400 transition-colors uppercase tracking-tight"
+                className="mt-2 font-extrabold text-sm sm:text-base text-slate-900 hover:text-emerald-700 transition-colors uppercase leading-tight"
               >
                 {awayTeam.name}
               </button>
-              <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-400 font-mono">
-                <Shield className="w-3.5 h-3.5 text-slate-400" />
-                <span>MANAGER: <strong className="text-slate-200">{awayTeam.manager_name}</strong></span>
-              </div>
+              <span className="text-[11px] text-slate-500 font-medium mt-0.5">
+                Mgr: {awayTeam.manager_name}
+              </span>
             </div>
 
           </div>
 
-          {/* Match Logistics Metadata */}
-          <div className="mt-8 pt-6 border-t border-stadium-800/80 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400 font-mono">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-emerald-400" />
-              {match.scheduled_date ? match.scheduled_date : <span>DATE TBA</span>}
+          {/* Fixture Logistics (Date, Time, Venue, Referees) */}
+          <div className="mt-5 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <span>{match.scheduled_date || 'Date: TBA'}</span>
             </span>
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-sky-400" />
-              {match.scheduled_time ? match.scheduled_time : <span>TIME TBA</span>}
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <span>{match.scheduled_time || 'Time: TBA'}</span>
             </span>
-            <span className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-gold-400" />
-              {match.venue ? match.venue : <span>VENUE TBA</span>}
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+              <span>{match.venue || 'Venue: TBA'}</span>
             </span>
           </div>
 
-          {/* Match Officials */}
-          <div className="mt-3 pt-3 border-t border-stadium-850/80 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[11px] text-slate-400 font-mono">
-            <span>REFEREE: <strong className="text-slate-200">{match.referee || 'TBA'}</strong></span>
-            <span className="text-stadium-700">•</span>
-            <span>LINE REF 1: <strong className="text-slate-200">{match.assistant_referee_1 || 'TBA'}</strong></span>
-            <span className="text-stadium-700">•</span>
-            <span>LINE REF 2: <strong className="text-slate-200">{match.assistant_referee_2 || 'TBA'}</strong></span>
-          </div>
+          {match.referee && (
+            <div className="mt-2 text-center text-[11px] text-slate-400">
+              Referee: <span className="font-medium text-slate-600">{match.referee}</span>
+              {match.assistant_referee_1 && ` • Lines: ${match.assistant_referee_1}`}
+              {match.assistant_referee_2 && `, ${match.assistant_referee_2}`}
+            </div>
+          )}
+
         </div>
 
       </div>
 
-      {/* MOTM BANNER (if awarded) */}
+      {/* LIVE MATCH LINK BANNER IF CURRENTLY LIVE */}
+      {isLive && (
+        <a
+          href="https://hostelleague.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block p-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 text-white shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                <Radio className="w-4 h-4 text-white animate-pulse" />
+              </div>
+              <div>
+                <span className="font-extrabold text-sm uppercase block tracking-wide">
+                  WATCH LIVE NOW
+                </span>
+                <span className="text-xs text-emerald-100">
+                  Follow live pitch commentary and real-time clock
+                </span>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-white" />
+          </div>
+        </a>
+      )}
+
+      {/* GOALSCORERS LIST (SIMPLE: TEAM + PLAYER) */}
+      {isCompleted && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5 pb-2 border-b border-slate-100">
+            <span>⚽</span>
+            <span>GOALSCORERS</span>
+          </h3>
+
+          {matchGoals.length === 0 ? (
+            <p className="text-xs text-slate-500 py-1">No goals scored in this match.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              {/* Home Team Goals */}
+              <div className="space-y-1.5">
+                <span className="font-bold text-slate-800 block text-[11px] uppercase pb-1 border-b border-slate-100">
+                  {homeTeam.name} ({homeGoals.length})
+                </span>
+                {homeGoals.length === 0 ? (
+                  <span className="text-slate-400 text-xs italic">0 goals</span>
+                ) : (
+                  homeGoals.map((g, idx) => {
+                    const scorer = playersMap.get(g.player_id);
+                    return (
+                      <div
+                        key={g.id || idx}
+                        onClick={() => scorer && onSelectPlayer?.(scorer.id)}
+                        className={`flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-slate-100 ${
+                          scorer ? 'cursor-pointer hover:bg-slate-100' : ''
+                        }`}
+                      >
+                        <span className="text-sm">⚽</span>
+                        <span className="font-bold text-slate-900">{scorer?.name || 'Goal'}</span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Away Team Goals */}
+              <div className="space-y-1.5">
+                <span className="font-bold text-slate-800 block text-[11px] uppercase pb-1 border-b border-slate-100">
+                  {awayTeam.name} ({awayGoals.length})
+                </span>
+                {awayGoals.length === 0 ? (
+                  <span className="text-slate-400 text-xs italic">0 goals</span>
+                ) : (
+                  awayGoals.map((g, idx) => {
+                    const scorer = playersMap.get(g.player_id);
+                    return (
+                      <div
+                        key={g.id || idx}
+                        onClick={() => scorer && onSelectPlayer?.(scorer.id)}
+                        className={`flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-slate-100 ${
+                          scorer ? 'cursor-pointer hover:bg-slate-100' : ''
+                        }`}
+                      >
+                        <span className="text-sm">⚽</span>
+                        <span className="font-bold text-slate-900">{scorer?.name || 'Goal'}</span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* MAN OF THE MATCH CARD (IF AWARDED) */}
       {motmPlayer && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
+        <div
           onClick={() => onSelectPlayer?.(motmPlayer.id)}
-          className={`p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-950/40 via-stadium-900 to-amber-950/40 border border-gold-500/40 flex items-center justify-between shadow-gold-glow ${
-            onSelectPlayer ? 'cursor-pointer hover:border-gold-400 transition-all group' : ''
+          className={`p-4 rounded-xl bg-amber-50/70 border border-amber-200 shadow-xs flex items-center justify-between ${
+            onSelectPlayer ? 'cursor-pointer hover:bg-amber-50 transition-colors' : ''
           }`}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <PlayerAvatar
               player={motmPlayer}
               team={teamsMap.get(motmPlayer.team_id)}
-              size="lg"
-              glow={true}
+              size="md"
             />
             <div>
-              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-gold-400 block">
-                OFFICIAL MAN OF THE MATCH
-              </span>
-              <h3 className="font-display font-black text-xl text-white group-hover:text-gold-400 transition-colors">
+              <div className="flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5 text-amber-600" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                  PLAYER OF THE MATCH
+                </span>
+              </div>
+              <h4 className="font-extrabold text-sm sm:text-base text-slate-900 mt-0.5">
                 {motmPlayer.name}
-              </h3>
-              <span className="text-xs text-slate-400 font-mono">
+              </h4>
+              <span className="text-xs text-slate-600">
                 {teamsMap.get(motmPlayer.team_id)?.name} • {motmPlayer.position}
               </span>
             </div>
           </div>
-          <div className="text-right flex items-center gap-2">
-            <div>
-              <span className="text-xs text-slate-400 font-mono uppercase font-bold block">MVP ACCOLADE</span>
-              {onSelectPlayer && (
-                <span className="text-[10px] text-gold-400 uppercase font-mono font-bold">
-                  View Profile →
-                </span>
-              )}
-            </div>
-          </div>
-        </motion.div>
+
+          {onSelectPlayer && (
+            <span className="text-xs font-semibold text-amber-800 shrink-0">
+              Profile →
+            </span>
+          )}
+        </div>
       )}
 
-      {/* PLAYER OF THE MATCH (POTM) FAN POLL */}
+      {/* PUBLIC POTM FAN VOTING */}
       <POTMPollCard
         matchId={match.id}
         players={players}
         teams={teams}
       />
-
-
-      {/* ANIMATED GOAL EVENT TIMELINE */}
-      {isCompleted && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* Goals section with animated progressive line draw */}
-          <div className="p-6 rounded-2xl bg-[#090d16] border border-stadium-750 space-y-4">
-            <h3 className="font-display font-black text-sm uppercase tracking-broadcast text-white flex items-center gap-2">
-              <span>⚽</span> GOALS TIMELINE ({matchGoals.length})
-            </h3>
-
-            {matchGoals.length === 0 ? (
-              <p className="text-xs text-slate-400 py-3 font-mono">No goals scored in this match.</p>
-            ) : (
-              <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-emerald-400 before:to-stadium-750">
-                {matchGoals.map((goal, idx) => {
-                  const player = playersMap.get(goal.player_id);
-                  const team = teamsMap.get(goal.team_id);
-                  return (
-                    <motion.div
-                      key={goal.id}
-                      initial={{ opacity: 0, x: -15 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: idx * 0.1 }}
-                      onClick={() => onSelectPlayer?.(goal.player_id)}
-                      className={`relative flex items-center justify-between p-3 rounded-xl bg-stadium-950/80 border border-stadium-800 text-xs transition-all ${
-                        onSelectPlayer ? 'cursor-pointer hover:border-gold-500/40 hover:bg-stadium-900 group' : ''
-                      }`}
-                    >
-                      {/* Timeline node */}
-                      <span className="absolute -left-[27px] w-3 h-3 rounded-full bg-emerald-400 border-2 border-stadium-950 shadow-sm" />
-
-                      <div className="flex items-center gap-2.5">
-                        <span className="font-mono font-black text-emerald-400 w-9 text-xs">
-                          {goal.minute}'
-                        </span>
-                        {player && (
-                          <PlayerAvatar
-                            player={player}
-                            team={team}
-                            size="xs"
-                          />
-                        )}
-                        <span className="font-bold text-slate-100 text-sm group-hover:text-gold-400 transition-colors">
-                          {player?.name || 'Goal'}
-                        </span>
-                      </div>
-                      <span className="text-slate-400 font-mono text-[11px]">
-                        {team?.name}
-                      </span>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Assists section */}
-          <div className="p-6 rounded-2xl bg-[#090d16] border border-stadium-750 space-y-4">
-            <h3 className="font-display font-black text-sm uppercase tracking-broadcast text-white flex items-center gap-2">
-              <span>🎯</span> ASSISTS ({matchAssists.length})
-            </h3>
-
-            {matchAssists.length === 0 ? (
-              <p className="text-xs text-slate-400 py-3 font-mono">No assists recorded for this match.</p>
-            ) : (
-              <div className="space-y-2.5">
-                {matchAssists.map((assist, idx) => {
-                  const player = playersMap.get(assist.player_id);
-                  const team = teamsMap.get(assist.team_id);
-                  return (
-                    <motion.div
-                      key={assist.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: idx * 0.1 }}
-                      onClick={() => onSelectPlayer?.(assist.player_id)}
-                      className={`flex items-center justify-between p-3 rounded-xl bg-stadium-950/80 border border-stadium-800 text-xs transition-all ${
-                        onSelectPlayer ? 'cursor-pointer hover:border-gold-500/40 hover:bg-stadium-900 group' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        {player && (
-                          <PlayerAvatar
-                            player={player}
-                            team={team}
-                            size="xs"
-                          />
-                        )}
-                        <span className="font-bold text-slate-100 text-sm group-hover:text-gold-400 transition-colors">
-                          {player?.name || 'Player'}
-                        </span>
-                        {assist.minute && (
-                          <span className="font-mono text-slate-400 text-xs">
-                            ({assist.minute}')
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-slate-400 font-mono text-[11px]">
-                        {team?.name}
-                      </span>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
     </div>
   );

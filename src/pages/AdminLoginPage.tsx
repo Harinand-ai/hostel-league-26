@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { Shield, Lock, Mail, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Shield, Lock, Mail, AlertCircle, ArrowLeft } from 'lucide-react';
 
 interface AdminLoginPageProps {
   onLoginSuccess: () => void;
@@ -61,12 +61,12 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 p-6 sm:p-8 rounded-2xl bg-stadium-900 border border-stadium-800 shadow-2xl">
+    <div className="max-w-md mx-auto my-8 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
       
       {/* Back button */}
       <button
         onClick={onNavigateHome}
-        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 transition-colors mb-6 cursor-pointer"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to Website
@@ -74,26 +74,20 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
 
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="w-12 h-12 rounded-xl bg-gold-500/20 border border-gold-500/40 mx-auto flex items-center justify-center text-gold-400 mb-3 shadow-inner">
-          <Shield className="w-6 h-6" />
+        <div className="w-12 h-12 rounded-xl bg-green-50 border border-green-200 mx-auto flex items-center justify-center text-green-700 mb-3">
+          <Shield className="w-6 h-6 text-green-700" />
         </div>
-        <h1 className="text-2xl font-black font-display uppercase tracking-tight text-white">
+        <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900">
           ADMIN PORTAL
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-slate-500 mt-1">
           Authorized match officials and tournament administrators only.
         </p>
       </div>
 
-      {/* Security badge */}
-      <div className="mb-6 p-2.5 rounded-lg bg-stadium-950/70 border border-stadium-800 text-[11px] flex items-center justify-center gap-2 text-slate-400 font-mono">
-        <Lock className="w-3.5 h-3.5 text-pitch-400" />
-        <span>Secure Administrator Authentication</span>
-      </div>
-
       {/* Error alert */}
       {errorMsg && (
-        <div className="mb-4 p-3 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+        <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -102,7 +96,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
             Admin Email
           </label>
           <div className="relative">
@@ -113,13 +107,13 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="admin@hostelleague26.com"
-              className="w-full bg-stadium-950 border border-stadium-750 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-green-600 focus:bg-white transition-colors"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
             Password
           </label>
           <div className="relative">
@@ -130,7 +124,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-stadium-950 border border-stadium-750 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-green-600 focus:bg-white transition-colors"
             />
           </div>
         </div>
@@ -138,7 +132,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         <button
           type="submit"
           disabled={loading}
-          className="w-full mt-2 py-2.5 px-4 rounded-lg bg-gold-500 hover:bg-gold-600 disabled:opacity-50 text-stadium-950 font-black font-display uppercase tracking-wider transition-colors shadow-lg shadow-gold-500/10 text-sm"
+          className="w-full mt-2 py-2.5 px-4 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold uppercase tracking-wider transition-colors shadow-xs text-sm cursor-pointer"
         >
           {loading ? 'Authenticating...' : 'Sign In to Dashboard'}
         </button>
