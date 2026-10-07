@@ -90,7 +90,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <span>Standings & Golden Boot</span>
               </button>
               <button
-                onClick={() => onNavigate('admin-login')}
+                onClick={() => onNavigate('admin')}
                 className="text-left text-[#968470] hover:text-white flex items-center gap-1.5 cursor-pointer py-0.5"
               >
                 <Users className="w-3 h-3" />

@@ -11,6 +11,7 @@ import {
   POTMPoll,
   POTMCandidate,
   POTMVote,
+  CommitteeMember,
 } from '../types/tournament';
 import { tournamentService } from '../services/tournamentService';
 import { TeamBadge } from '../components/TeamBadge';
@@ -25,7 +26,9 @@ import {
   Trash2, 
   ArrowLeft,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Phone,
+  X
 } from 'lucide-react';
 
 interface AdminDashboardPageProps {
@@ -52,7 +55,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onLogout,
   onNavigateHome,
 }) => {
-  const [activeTab, setActiveTab] = useState<'matches' | 'players' | 'teams' | 'potm'>('matches');
+  const [activeTab, setActiveTab] = useState<'matches' | 'players' | 'teams' | 'potm' | 'committee'>('matches');
 
   // MATCH EDIT SCREEN STATE (One match = one edit screen)
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -92,6 +95,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [newPollMatchId, setNewPollMatchId] = useState<string>(matches[0]?.id || '');
   const [selectedPollCandidates, setSelectedPollCandidates] = useState<string[]>([]);
 
+  // COMMITTEE MANAGEMENT STATE
+  const [committee, setCommittee] = useState<CommitteeMember[]>([]);
+  const [editingCommitteeMember, setEditingCommitteeMember] = useState<CommitteeMember | null>(null);
+
   // Feedback banner
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -128,6 +135,35 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   useEffect(() => {
     loadPollsData();
   }, [loadPollsData]);
+
+  // Load Committee data
+  const loadCommitteeData = useCallback(async () => {
+    try {
+      const cList = await tournamentService.getCommitteeMembers();
+      setCommittee(cList);
+    } catch (err) {
+      console.warn('Committee load error:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCommitteeData();
+  }, [loadCommitteeData]);
+
+  const handleSaveCommitteeMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCommitteeMember) return;
+    try {
+      await tournamentService.updateCommitteeMember(editingCommitteeMember);
+      const updated = await tournamentService.getCommitteeMembers();
+      setCommittee(updated);
+      setEditingCommitteeMember(null);
+      showToast('Committee coordinator details saved.');
+      onDataChanged();
+    } catch {
+      showToast('Failed to update committee member.', 'error');
+    }
+  };
 
   // When admin clicks a match to edit
   const handleOpenMatchEditor = (match: Match) => {
@@ -356,6 +392,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             { id: 'players', label: 'Players', icon: Users },
             { id: 'teams', label: 'Clubs', icon: Shield },
             { id: 'potm', label: 'POTM Polls', icon: Award },
+            { id: 'committee', label: 'Committee', icon: Phone },
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -974,6 +1011,130 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ================= TAB 5: COMMITTEE ================= */}
+      {activeTab === 'committee' && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div className="pb-2 border-b border-slate-100">
+            <h2 className="text-xs font-bold uppercase text-slate-900">
+              Tournament Committee Coordinators
+            </h2>
+            <p className="text-[11px] text-slate-500">
+              Manage official tournament coordinators and direct contact details
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {committee.map(member => (
+              <div
+                key={member.id}
+                className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between space-y-3"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-800 border border-green-200">
+                      {member.role}
+                    </span>
+                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  </div>
+                  <h3 className="font-bold text-sm text-slate-900 uppercase">
+                    {member.name}
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Phone: <strong className="text-slate-900">{member.phone}</strong>
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setEditingCommitteeMember(member)}
+                  className="w-full py-1.5 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs uppercase transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Edit Coordinator</span>
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Edit Committee Modal */}
+          {editingCommitteeMember && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+              <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-200 shadow-xl space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h3 className="font-bold text-sm text-slate-900 uppercase">
+                    Edit Coordinator
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setEditingCommitteeMember(null)}
+                    className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSaveCommitteeMember} className="space-y-3 text-xs">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold uppercase block mb-1">
+                      Coordinator Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editingCommitteeMember.name}
+                      onChange={e => setEditingCommitteeMember({ ...editingCommitteeMember, name: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold uppercase block mb-1">
+                      Role / Designation
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editingCommitteeMember.role}
+                      onChange={e => setEditingCommitteeMember({ ...editingCommitteeMember, role: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold uppercase block mb-1">
+                      Phone Number
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editingCommitteeMember.phone}
+                      onChange={e => setEditingCommitteeMember({ ...editingCommitteeMember, phone: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs text-slate-900"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setEditingCommitteeMember(null)}
+                      className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-bold uppercase cursor-pointer"
+                    >
+                      Save Coordinator
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
         </div>

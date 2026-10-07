@@ -20,29 +20,58 @@ import { MatchDetailPage } from './pages/MatchDetailPage';
 import { RulesPage } from './pages/RulesPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminAuthGuard } from './components/AdminAuthGuard';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { PlayerProfileModal } from './components/PlayerProfileModal';
 import { LiveMatchModal } from './components/LiveMatchModal';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
-const getInitialNav = (): { tab: string; param?: string } => {
+export interface RouteState {
+  tab: string;
+  param?: string;
+}
+
+export const parseCurrentRoute = (): RouteState => {
   if (typeof window === 'undefined') return { tab: 'home' };
-  
-  // 1. Check URL hash (e.g. #matches, #teams)
-  const hash = window.location.hash.replace('#', '').trim();
-  if (hash && hash !== 'quick-view') {
-    const [tab, param] = hash.split('/');
-    if (tab && ['home', 'matches', 'match-detail', 'teams', 'team-detail', 'stats', 'rules', 'admin', 'admin-login'].includes(tab)) {
-      return { tab, param };
+
+  // 1. Check URL hash (e.g. #/admin/login, #admin/login, #admin-login, #admin, #matches, #match-detail/m1)
+  const hashRaw = window.location.hash.replace(/^#\/?/, '').trim();
+  if (hashRaw && hashRaw !== 'quick-view') {
+    if (hashRaw === 'admin/login' || hashRaw === 'admin-login') {
+      return { tab: 'admin-login' };
+    }
+    const [hTab, hParam] = hashRaw.split('/');
+    if (hTab === 'admin' && hParam === 'login') {
+      return { tab: 'admin-login' };
+    }
+    if (['home', 'matches', 'fixtures', 'results', 'match-detail', 'teams', 'team-detail', 'stats', 'table', 'rules', 'admin', 'admin-login'].includes(hTab)) {
+      return { tab: hTab, param: hParam };
     }
   }
-  
-  // Always default to 'home' on initial opening
+
+  // 2. Check URL pathname (e.g. /admin, /admin/login, /matches, /match-detail/m1)
+  const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '').trim();
+  if (pathname) {
+    if (pathname === 'admin/login' || pathname === 'admin-login') {
+      return { tab: 'admin-login' };
+    }
+    const [pTab, pParam] = pathname.split('/');
+    if (pTab === 'admin') {
+      if (pParam === 'login') {
+        return { tab: 'admin-login' };
+      }
+      return { tab: 'admin' };
+    }
+    if (['home', 'matches', 'fixtures', 'results', 'match-detail', 'teams', 'team-detail', 'stats', 'table', 'rules'].includes(pTab)) {
+      return { tab: pTab, param: pParam };
+    }
+  }
+
   return { tab: 'home' };
 };
 
 export function App() {
-  const initialNav = useMemo(() => getInitialNav(), []);
+  const initialNav = useMemo(() => parseCurrentRoute(), []);
 
   // Navigation & Routing state
   const [currentTab, setCurrentTab] = useState<string>(initialNav.tab);
@@ -67,8 +96,8 @@ export function App() {
     }
     
     // Don't show intro if directly opening admin
-    const hash = window.location.hash.replace('#', '').trim();
-    if (hash === 'admin' || hash === 'admin-login') {
+    const route = parseCurrentRoute();
+    if (route.tab === 'admin' || route.tab === 'admin-login') {
       return false;
     }
     
@@ -82,7 +111,10 @@ export function App() {
     return true;
   });
 
-  // Admin login session state
+  // Admin auth & session state
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(() => {
+    return isSupabaseConfigured && Boolean(supabase);
+  });
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('hl26_admin_auth') === 'true';
@@ -126,37 +158,33 @@ export function App() {
     loadData();
   }, [loadData]);
 
-  // Handle URL hash routing
+  // Listen for browser popstate and hash changes
   useEffect(() => {
-    const handleHash = () => {
-      const hash = window.location.hash.replace('#', '').trim();
-      if (hash) {
-        const [tab, param] = hash.split('/');
-        if (tab) {
-          setCurrentTab(tab);
-          setActiveParam(param);
-          try {
-            localStorage.setItem('hl26_active_tab', tab);
-            if (param) {
-              localStorage.setItem('hl26_active_param', param);
-            } else {
-              localStorage.removeItem('hl26_active_param');
-            }
-          } catch {}
-        }
-      }
+    const handleUrlChange = () => {
+      const route = parseCurrentRoute();
+      setCurrentTab(route.tab);
+      setActiveParam(route.param);
     };
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
   }, []);
 
   const handleNavigate = (tab: string, param?: string) => {
-    setCurrentTab(tab);
+    let normalizedTab = tab;
+    if (tab === 'admin/login') {
+      normalizedTab = 'admin-login';
+    }
+
+    setCurrentTab(normalizedTab);
     setActiveParam(param);
     
     try {
-      localStorage.setItem('hl26_active_tab', tab);
+      localStorage.setItem('hl26_active_tab', normalizedTab);
       if (param) {
         localStorage.setItem('hl26_active_param', param);
       } else {
@@ -164,7 +192,36 @@ export function App() {
       }
     } catch {}
 
-    window.location.hash = param ? `${tab}/${param}` : tab;
+    // Determine target URL path
+    let targetPath = '/';
+    if (normalizedTab === 'admin') {
+      targetPath = '/admin';
+    } else if (normalizedTab === 'admin-login') {
+      targetPath = '/admin/login';
+    } else if (normalizedTab === 'matches' || normalizedTab === 'fixtures' || normalizedTab === 'results') {
+      targetPath = '/matches';
+    } else if (normalizedTab === 'teams') {
+      targetPath = '/teams';
+    } else if (normalizedTab === 'stats' || normalizedTab === 'table') {
+      targetPath = '/stats';
+    } else if (normalizedTab === 'rules') {
+      targetPath = '/rules';
+    } else if (normalizedTab === 'match-detail') {
+      targetPath = param ? `/match-detail/${param}` : '/matches';
+    } else if (normalizedTab === 'team-detail') {
+      targetPath = param ? `/team-detail/${param}` : '/teams';
+    } else {
+      targetPath = '/';
+    }
+
+    try {
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState(null, '', targetPath);
+      } else if (window.location.hash) {
+        window.history.replaceState(null, '', targetPath);
+      }
+    } catch {}
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -173,10 +230,10 @@ export function App() {
     try {
       sessionStorage.setItem('hl26_intro_played_session', 'true');
     } catch {}
-    setCurrentTab('home');
-    setActiveParam(undefined);
-    window.location.hash = 'home';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const route = parseCurrentRoute();
+    if (route.tab !== 'admin' && route.tab !== 'admin-login') {
+      handleNavigate('home');
+    }
   };
 
   const handleReplayIntro = () => {
@@ -186,26 +243,61 @@ export function App() {
     setShowIntro(true);
   };
 
-  // Check Supabase Auth session for admin status
+  // Check Supabase Auth session for admin status with loading state
   useEffect(() => {
     if (isSupabaseConfigured && supabase) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user && session.user.email) {
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (!error && session?.user && session.user.email) {
           setIsAdminLoggedIn(true);
+          try {
+            localStorage.setItem('hl26_admin_auth', 'true');
+          } catch {}
+        } else {
+          const localAuth = localStorage.getItem('hl26_admin_auth') === 'true';
+          setIsAdminLoggedIn(localAuth);
         }
+        setIsAuthLoading(false);
+      }).catch((err) => {
+        console.warn('Supabase auth getSession error:', err);
+        const localAuth = localStorage.getItem('hl26_admin_auth') === 'true';
+        setIsAdminLoggedIn(localAuth);
+        setIsAuthLoading(false);
       });
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user && session.user.email) {
-          setIsAdminLoggedIn(true);
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (session?.user && session.user.email) {
+            setIsAdminLoggedIn(true);
+            try {
+              localStorage.setItem('hl26_admin_auth', 'true');
+            } catch {}
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setIsAdminLoggedIn(false);
+          try {
+            localStorage.removeItem('hl26_admin_auth');
+          } catch {}
         }
       });
       return () => subscription.unsubscribe();
+    } else {
+      setIsAuthLoading(false);
     }
   }, []);
 
+  // Redirect to admin dashboard if logged in user is on admin-login
+  useEffect(() => {
+    if ((currentTab === 'admin-login' || currentTab === 'admin/login') && !isAuthLoading && isAdminLoggedIn) {
+      handleNavigate('admin');
+    }
+  }, [currentTab, isAuthLoading, isAdminLoggedIn]);
+
   const handleAdminLogin = () => {
     setIsAdminLoggedIn(true);
-    localStorage.setItem('hl26_admin_auth', 'true');
+    try {
+      localStorage.setItem('hl26_admin_auth', 'true');
+    } catch {}
+    handleNavigate('admin');
   };
 
   const handleAdminLogout = async () => {
@@ -217,8 +309,10 @@ export function App() {
       }
     }
     setIsAdminLoggedIn(false);
-    localStorage.removeItem('hl26_admin_auth');
-    handleNavigate('home');
+    try {
+      localStorage.removeItem('hl26_admin_auth');
+    } catch {}
+    handleNavigate('admin/login');
   };
 
   // Compute active poll match IDs set
@@ -354,25 +448,52 @@ export function App() {
         );
 
       case 'admin':
-        if (!isAdminLoggedIn) {
-          return (
-            <AdminLoginPage
-              onLoginSuccess={handleAdminLogin}
+        return (
+          <AdminAuthGuard
+            isLoading={isAuthLoading}
+            isAuthenticated={isAdminLoggedIn}
+            onRedirectToLogin={() => handleNavigate('admin/login')}
+          >
+            <AdminDashboardPage
+              teams={teams}
+              matches={matches}
+              players={players}
+              goals={goals}
+              motms={motms}
+              standings={standings}
+              topScorers={topScorers}
+              onDataChanged={loadData}
+              onLogout={handleAdminLogout}
               onNavigateHome={() => handleNavigate('home')}
             />
+          </AdminAuthGuard>
+        );
+
+      case 'admin-login':
+      case 'admin/login':
+        if (isAuthLoading) {
+          return (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4 py-12">
+              <div className="w-9 h-9 rounded-full border-2 border-slate-700 border-t-green-500 animate-spin" />
+              <p className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
+                Verifying Administrator Session...
+              </p>
+            </div>
+          );
+        }
+        if (isAdminLoggedIn) {
+          return (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4 py-12">
+              <div className="w-9 h-9 rounded-full border-2 border-slate-700 border-t-green-500 animate-spin" />
+              <p className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
+                Admin Authenticated • Redirecting to Dashboard...
+              </p>
+            </div>
           );
         }
         return (
-          <AdminDashboardPage
-            teams={teams}
-            matches={matches}
-            players={players}
-            goals={goals}
-            motms={motms}
-            standings={standings}
-            topScorers={topScorers}
-            onDataChanged={loadData}
-            onLogout={handleAdminLogout}
+          <AdminLoginPage
+            onLoginSuccess={handleAdminLogin}
             onNavigateHome={() => handleNavigate('home')}
           />
         );
