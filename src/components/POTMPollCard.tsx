@@ -45,18 +45,22 @@ export const POTMPollCard: React.FC<POTMPollCardProps> = ({
       }
 
       setPoll(matchPoll);
-      const [candList, voteList] = await Promise.all([
+      const [candList, voteList, currentVoterId] = await Promise.all([
         tournamentService.getCandidates(matchPoll.id),
         tournamentService.getVotes(matchPoll.id),
+        tournamentService.getCurrentVoterId(),
       ]);
 
       setCandidates(candList);
       setVotes(voteList);
 
-      // Check if this anonymous user already voted
-      const existingVote = voteList.find(v => v.user_id === voterId);
+      // Check if this voter already voted
+      const existingVote = voteList.find(v => v.user_id === currentVoterId || v.user_id === voterId);
+      const localVoted = localStorage.getItem(`hl26_potm_voted_${matchPoll.id}`);
       if (existingVote) {
         setHasVotedCandidateId(existingVote.candidate_id);
+      } else if (localVoted) {
+        setHasVotedCandidateId(localVoted);
       }
     } catch (err) {
       console.warn('Error loading POTM poll data:', err);
@@ -75,9 +79,13 @@ export const POTMPollCard: React.FC<POTMPollCardProps> = ({
 
     setVotingLoading(true);
     try {
-      const result = await tournamentService.submitVote(poll.id, selectedCandidateId, voterId);
+      const currentVoterId = await tournamentService.getCurrentVoterId();
+      const result = await tournamentService.submitVote(poll.id, selectedCandidateId, currentVoterId);
       if (result.success) {
         setHasVotedCandidateId(selectedCandidateId);
+        try {
+          localStorage.setItem(`hl26_potm_voted_${poll.id}`, selectedCandidateId);
+        } catch {}
         setVoteSuccessMessage('Vote submitted successfully! Thank you for voting.');
         const updatedVotes = await tournamentService.getVotes(poll.id);
         setVotes(updatedVotes);

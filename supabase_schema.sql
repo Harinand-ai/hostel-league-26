@@ -167,7 +167,47 @@ DROP POLICY IF EXISTS "Authenticated users can vote once" ON potm_votes;
 DROP POLICY IF EXISTS "Public can vote once" ON potm_votes;
 CREATE POLICY "Public can vote once" ON potm_votes 
   FOR INSERT TO anon, authenticated 
-  WITH CHECK (true);
+  WITH CHECK (
+    (auth.uid() IS NOT NULL AND auth.uid()::text = user_id)
+    OR
+    (auth.uid() IS NULL AND user_id IS NOT NULL AND length(trim(user_id)) > 0)
+  );
+
+-- HIGH-RELIABILITY VOTE SUBMISSION RPC FUNCTION
+CREATE OR REPLACE FUNCTION submit_potm_vote(
+  p_poll_id TEXT,
+  p_candidate_id TEXT,
+  p_user_id TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_vote_id TEXT;
+  v_user_id TEXT;
+BEGIN
+  IF auth.uid() IS NOT NULL THEN
+    v_user_id := auth.uid()::text;
+  ELSE
+    v_user_id := COALESCE(NULLIF(trim(p_user_id), ''), 'anon-' || gen_random_uuid()::text);
+  END IF;
+
+  v_vote_id := 'vote-' || extract(epoch from now())::bigint || '-' || substr(md5(random()::text), 1, 6);
+
+  INSERT INTO potm_votes (id, poll_id, candidate_id, user_id, created_at)
+  VALUES (v_vote_id, p_poll_id, p_candidate_id, v_user_id, NOW());
+
+  RETURN jsonb_build_object('success', true, 'vote_id', v_vote_id, 'user_id', v_user_id);
+EXCEPTION
+  WHEN unique_violation THEN
+    RETURN jsonb_build_object('success', false, 'error', 'You have already voted in this poll.');
+  WHEN OTHERS THEN
+    RETURN jsonb_build_object('success', false, 'error', SQLERRM);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION submit_potm_vote(TEXT, TEXT, TEXT) TO anon, authenticated;
 
 -- ADMIN FULL ACCESS (Authenticated)
 DROP POLICY IF EXISTS "Admin full access teams" ON teams;

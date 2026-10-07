@@ -42,3 +42,28 @@ export function getOrCreateAnonymousVoterId(): string {
   }
   return voterId;
 }
+
+// Helper to get or initialize an authenticated or anonymous Supabase voter ID
+export async function getOrInitSupabaseVoterId(): Promise<string> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      // 1. Check existing session (authenticated admin or existing anonymous user)
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session?.user?.id) {
+        return sessionData.session.user.id;
+      }
+
+      // 2. Attempt Supabase anonymous sign-in if no active session
+      const { data: anonData, error } = await supabase.auth.signInAnonymously();
+      if (!error && anonData?.user?.id) {
+        return anonData.user.id;
+      }
+    } catch (err) {
+      console.warn('Supabase voter session resolution notice:', err);
+    }
+  }
+
+  // 3. Fallback to unique persistent device voter ID
+  return getOrCreateAnonymousVoterId();
+}
+

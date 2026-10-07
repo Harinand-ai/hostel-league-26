@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured, getOrCreateAnonymousVoterId } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, getOrCreateAnonymousVoterId, getOrInitSupabaseVoterId } from '../lib/supabase';
 import {
   Team,
   Match,
@@ -608,13 +608,17 @@ class TournamentService {
     return all.filter(v => v.poll_id === pollId);
   }
 
+  async getCurrentVoterId(): Promise<string> {
+    return getOrInitSupabaseVoterId();
+  }
+
   // Fast, frictionless anonymous public voting: NO email, NO password, NO OTP
   async submitVote(pollId: string, candidateId: string, customUserId?: string): Promise<{ success: boolean; error?: string }> {
     if (!pollId || !candidateId) {
       return { success: false, error: 'Poll and candidate selection are required.' };
     }
 
-    const voterId = customUserId || getOrCreateAnonymousVoterId();
+    const voterId = customUserId || await getOrInitSupabaseVoterId();
 
     // Check local storage duplicate prevention first
     const storedVotes = localStorage.getItem(STORAGE_KEYS.VOTES);
@@ -633,45 +637,61 @@ class TournamentService {
     };
 
     if (isSupabaseConfigured && supabase) {
+      // 1. Try high-reliability RPC function if deployed in Supabase
       try {
-        // Try to get existing auth user or attempt anonymous sign in
-        let effectiveUserId = voterId;
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (sessionData?.session?.user) {
-          effectiveUserId = sessionData.session.user.id;
-        } else {
-          try {
-            const { data: anonData } = await supabase.auth.signInAnonymously();
-            if (anonData?.user) {
-              effectiveUserId = anonData.user.id;
-            }
-          } catch {
-            // Anonymous sign-in not enabled in remote Supabase dashboard; proceed with voterId
-          }
-        }
-
-        const { error } = await supabase.from('potm_votes').insert({
-          id: newVote.id,
-          poll_id: pollId,
-          candidate_id: candidateId,
-          user_id: effectiveUserId,
-          created_at: newVote.created_at,
+        const { data: rpcData, error: rpcError } = await supabase.rpc('submit_potm_vote', {
+          p_poll_id: pollId,
+          p_candidate_id: candidateId,
+          p_user_id: voterId,
         });
 
-        if (error) {
-          if (error.code === '23505' || error.message.includes('unique')) {
-            return { success: false, error: 'You have already voted in this poll.' };
+        if (!rpcError && rpcData && typeof rpcData === 'object') {
+          const rpcRes = rpcData as { success?: boolean; error?: string; vote_id?: string; user_id?: string };
+          if (!rpcRes.success) {
+            return { success: false, error: rpcRes.error || 'You have already voted in this poll.' };
           }
-          console.warn('Supabase vote insert notice (storing vote locally):', error.message);
+          newVote.id = rpcRes.vote_id || newVote.id;
+          newVote.user_id = rpcRes.user_id || voterId;
+
+          allVotes.push(newVote);
+          localStorage.setItem(STORAGE_KEYS.VOTES, JSON.stringify(allVotes));
+          try {
+            localStorage.setItem(`hl26_potm_voted_${pollId}`, candidateId);
+          } catch {}
+
+          return { success: true };
         }
-      } catch (err: any) {
-        console.warn('Supabase vote notice (storing locally):', err);
+      } catch {
+        // RPC not configured, proceed to direct table insert
+      }
+
+      // 2. Direct table insert with exact RLS error handling
+      const { error: insertError } = await supabase.from('potm_votes').insert({
+        id: newVote.id,
+        poll_id: pollId,
+        candidate_id: candidateId,
+        user_id: voterId,
+        created_at: newVote.created_at,
+      });
+
+      if (insertError) {
+        if (insertError.code === '23505' || insertError.message.includes('unique') || insertError.message.includes('duplicate')) {
+          return { success: false, error: 'You have already voted in this poll.' };
+        }
+        console.error('Supabase vote insert error:', insertError);
+        return {
+          success: false,
+          error: `Vote could not be recorded in database (${insertError.message || insertError.code}). Please apply the database migration.`,
+        };
       }
     }
 
-    // Always record locally so vote is never lost
+    // Always record locally on success
     allVotes.push(newVote);
     localStorage.setItem(STORAGE_KEYS.VOTES, JSON.stringify(allVotes));
+    try {
+      localStorage.setItem(`hl26_potm_voted_${pollId}`, candidateId);
+    } catch {}
 
     return { success: true };
   }
