@@ -25,6 +25,8 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import { PlayerProfileModal } from './components/PlayerProfileModal';
 import { LiveMatchModal } from './components/LiveMatchModal';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { Analytics } from '@vercel/analytics/react';
+
 
 export interface RouteState {
   tab: string;
@@ -579,6 +581,9 @@ export function App() {
         isOpen={isLiveWindowOpen}
         onClose={() => setIsLiveWindowOpen(false)}
       />
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
 
     </div>
   );
